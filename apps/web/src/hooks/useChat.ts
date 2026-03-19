@@ -7,12 +7,19 @@ export type { ChatMessage };
 export type UseChatResponse = {
   messages: ChatMessage[];
   isStreaming: boolean;
+  error: string | null;
   sendMessage: (message: string) => Promise<void>;
 };
 
+const INITIAL_MESSAGE: ChatMessage = {
+  role: "assistant",
+  content: "Hi! I'm Aaron's ResumeBot. What would you like to know about Aaron?",
+};
+
 export function useChat(): UseChatResponse {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const appendToLastMessage = (text: string) => {
     setMessages((prev) => {
@@ -34,15 +41,19 @@ export function useChat(): UseChatResponse {
 
     setMessages(next);
     setIsStreaming(true);
+    setError(null);
 
     try {
       for await (const text of streamChatResponse(next.slice(0, -1))) {
         appendToLastMessage(text);
       }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setMessages((prev) => prev.slice(0, -1));
     } finally {
       setIsStreaming(false);
     }
   };
 
-  return { messages, isStreaming, sendMessage };
+  return { messages, isStreaming, error, sendMessage };
 }

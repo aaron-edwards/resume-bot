@@ -19,8 +19,11 @@ export async function chatRoutes(app: FastifyInstance) {
                 required: ["role", "content"],
                 properties: {
                   role: { type: "string", enum: ["user", "assistant"] },
-                  content: { type: "string", minLength: 1, maxLength: 1000 },
+                  content: { type: "string", minLength: 1 },
                 },
+                if: { properties: { role: { const: "user" } } },
+                // biome-ignore lint/suspicious/noThenProperty: `then` is part of the fastify schema validation
+                then: { properties: { content: { maxLength: 1000 } } },
               },
             },
           },

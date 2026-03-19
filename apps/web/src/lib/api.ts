@@ -10,6 +10,11 @@ export async function* streamChatResponse(messages: ChatMessage[]): AsyncGenerat
     body: JSON.stringify(body),
   });
 
+  if (!response.ok) {
+    if (response.status === 429) throw new Error("You're sending messages too fast. Please wait a moment and try again.");
+    throw new Error(`Something went wrong (${response.status}). Please try again.`);
+  }
+
   const reader = response.body?.getReader();
   const decoder = new TextDecoder();
   if (!reader) return;
@@ -24,6 +29,7 @@ export async function* streamChatResponse(messages: ChatMessage[]): AsyncGenerat
       if (data === "[DONE]") return;
 
       const parsed = JSON.parse(data) as { text?: string; error?: string };
+      if (parsed.error) throw new Error(parsed.error);
       if (parsed.text) yield parsed.text;
     }
   }
