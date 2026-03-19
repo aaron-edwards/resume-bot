@@ -1,5 +1,14 @@
 import type { ChatMessage, ChatRequest } from "@repo/types";
 
+type SseParsed = { text?: string; error?: string };
+
+function parseSseLine(line: string): SseParsed | "[DONE]" | null {
+  if (!line.startsWith("data: ")) return null;
+  const data = line.slice(6);
+  if (data === "[DONE]") return "[DONE]";
+  return JSON.parse(data) as SseParsed;
+}
+
 export async function* streamChatResponse(messages: ChatMessage[]): AsyncGenerator<string> {
   const body: ChatRequest = { messages };
 
@@ -24,11 +33,9 @@ export async function* streamChatResponse(messages: ChatMessage[]): AsyncGenerat
     if (done) break;
 
     for (const line of decoder.decode(value).split("\n")) {
-      if (!line.startsWith("data: ")) continue;
-      const data = line.slice(6);
-      if (data === "[DONE]") return;
-
-      const parsed = JSON.parse(data) as { text?: string; error?: string };
+      const parsed = parseSseLine(line);
+      if (!parsed) continue;
+      if (parsed === "[DONE]") return;
       if (parsed.error) throw new Error(parsed.error);
       if (parsed.text) yield parsed.text;
     }

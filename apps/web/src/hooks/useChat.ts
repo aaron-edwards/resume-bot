@@ -21,15 +21,6 @@ export function useChat(): UseChatResponse {
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const appendToLastMessage = (text: string) => {
-    setMessages((prev) => {
-      const updated = [...prev];
-      const last = updated[updated.length - 1];
-      if (last) updated[updated.length - 1] = { ...last, content: last.content + text };
-      return updated;
-    });
-  };
-
   const sendMessage = async (message: string) => {
     if (!message.trim() || isStreaming) return;
 
@@ -45,7 +36,12 @@ export function useChat(): UseChatResponse {
 
     try {
       for await (const text of streamChatResponse(next.slice(0, -1))) {
-        appendToLastMessage(text);
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[updated.length - 1];
+          if (last) updated[updated.length - 1] = { ...last, content: last.content + text };
+          return updated;
+        });
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");

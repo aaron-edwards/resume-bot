@@ -14,7 +14,7 @@ function createSseStream(events: string[]) {
 }
 
 function mockFetch(stream: ReadableStream) {
-  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ body: stream }));
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, body: stream }));
 }
 
 beforeEach(() => {
@@ -62,13 +62,12 @@ describe("streamChatResponse", () => {
     expect(chunks).toEqual(["Hello"]);
   });
 
-  it("skips chunks with no text field", async () => {
-    mockFetch(
-      createSseStream([JSON.stringify({ error: "something went wrong" }), JSON.stringify({ text: "Hello" })])
-    );
+  it("throws when the stream contains an error event", async () => {
+    mockFetch(createSseStream([JSON.stringify({ error: "something went wrong" })]));
 
-    const chunks = await collect(streamChatResponse([{ role: "user", content: "Hi" }]));
-    expect(chunks).toEqual(["Hello"]);
+    await expect(collect(streamChatResponse([{ role: "user", content: "Hi" }]))).rejects.toThrow(
+      "something went wrong"
+    );
   });
 
   it("yields nothing when stream is empty", async () => {
