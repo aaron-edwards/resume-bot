@@ -23,7 +23,7 @@ export async function chatRoutes(app: FastifyInstance) {
                 },
                 if: { properties: { role: { const: "user" } } },
                 // biome-ignore lint/suspicious/noThenProperty: `then` is part of the fastify schema validation
-                then: { properties: { content: { maxLength: 1000 } } },
+                then: { properties: { content: { type: "string", maxLength: 1000 } } },
               },
             },
           },
@@ -43,13 +43,8 @@ export async function chatRoutes(app: FastifyInstance) {
       reply.raw.flushHeaders();
 
       try {
-        const stream = streamChat(messages);
-
-        for await (const chunk of stream) {
-          const text = chunk.text;
-          if (text) {
-            reply.raw.write(`data: ${JSON.stringify({ text })}\n\n`);
-          }
+        for await (const text of streamChat(messages)) {
+          reply.raw.write(`data: ${JSON.stringify({ text })}\n\n`);
         }
 
         reply.raw.write("data: [DONE]\n\n");

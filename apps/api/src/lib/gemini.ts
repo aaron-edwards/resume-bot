@@ -13,10 +13,9 @@ Here is the candidate's resume:
 
 ${resume}`;
 
-export type ChatChunk = { text: string | undefined };
+const client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-export async function* streamChat(messages: ChatMessage[]): AsyncGenerator<ChatChunk> {
-  const client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+export async function* streamChat(messages: ChatMessage[]): AsyncGenerator<string> {
   const stream = await client.models.generateContentStream({
     model: "gemini-2.5-flash",
     config: { systemInstruction: SYSTEM_PROMPT },
@@ -27,6 +26,6 @@ export async function* streamChat(messages: ChatMessage[]): AsyncGenerator<ChatC
   });
 
   for await (const chunk of stream) {
-    yield { text: chunk.text };
+    if (chunk.text) yield chunk.text;
   }
 }

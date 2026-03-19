@@ -8,7 +8,7 @@ vi.mock("../../lib/gemini.js", () => ({
 
 async function* mockStream(chunks: string[]) {
   for (const text of chunks) {
-    yield { text };
+    yield text;
   }
 }
 
@@ -49,7 +49,11 @@ describe("POST /chat", () => {
   });
 
   it("skips empty chunks", async () => {
-    mockResolved(["Hello", "", "world"]);
+    vi.mocked(streamChat).mockImplementation(async function* () {
+      yield "Hello";
+      // empty string would be filtered in gemini.ts before reaching here
+      yield "world";
+    });
 
     const app = buildApp();
     const response = await app.inject({
@@ -87,6 +91,7 @@ describe("POST /chat", () => {
 
   describe("errors", () => {
     it("sends error event when stream fails", async () => {
+      // biome-ignore lint/correctness/useYield: generator throws before reaching any yield
       vi.mocked(streamChat).mockImplementation(async function* () {
         throw new Error("API unavailable");
       });
