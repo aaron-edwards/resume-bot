@@ -23,6 +23,10 @@ export async function chatRoutes(app: FastifyInstance) {
       reply.raw.setHeader("Content-Type", "text/event-stream");
       reply.raw.setHeader("Cache-Control", "no-cache");
       reply.raw.setHeader("Connection", "keep-alive");
+      reply.raw.setHeader(
+        "Access-Control-Allow-Origin",
+        process.env.CORS_ORIGIN ?? "http://localhost:5173"
+      );
       reply.raw.flushHeaders();
 
       try {
