@@ -80,7 +80,7 @@ export default function App() {
         ))}
       </div>
 
-      <div className="flex items-end gap-2">
+      <div className="relative">
         <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -88,13 +88,14 @@ export default function App() {
           placeholder="Ask about my experience... (Enter to send, Shift+Enter for new line)"
           rows={3}
           disabled={isStreaming}
-          className="resize-none flex-1"
+          className="resize-none pr-12 pb-10"
         />
         <Button
           onClick={handleSend}
           disabled={!input.trim() || isStreaming}
-          variant="outline"
+          variant="default"
           size="icon"
+          className="absolute bottom-2 right-2"
         >
           <SendHorizontal className="h-4 w-4" />
         </Button>
