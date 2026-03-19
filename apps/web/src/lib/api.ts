@@ -3,7 +3,8 @@ import type { ChatMessage, ChatRequest } from "@repo/types";
 export async function* streamChatResponse(messages: ChatMessage[]): AsyncGenerator<string> {
   const body: ChatRequest = { messages };
 
-  const response = await fetch("http://localhost:3001/chat", {
+  const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
+  const response = await fetch(`${apiUrl}/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),

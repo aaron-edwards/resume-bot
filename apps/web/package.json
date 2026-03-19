@@ -17,9 +17,13 @@
     "@fontsource-variable/geist-mono": "^5.2.7",
     "@repo/types": "workspace:^",
     "@repo/ui": "workspace:*",
+    "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.2.2",
+    "lucide-react": "^0.511.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
     "tailwindcss": "^4.2.2"
   },
   "devDependencies": {
