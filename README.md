@@ -5,7 +5,7 @@ An interactive resume demo — chat with an LLM that has been primed with my exp
 ## Stack
 
 - **Frontend** — React + Vite (`apps/web`)
-- **Backend** — Node.js (`apps/api`)
+- **Backend** — Fastify + Node.js (`apps/api`)
 - **LLM** — Google Gemini (via Gemini API)
 - **Monorepo** — Turborepo + pnpm
 - **Language** — TypeScript throughout
