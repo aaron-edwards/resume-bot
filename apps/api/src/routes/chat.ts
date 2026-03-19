@@ -1,24 +1,34 @@
 import type { FastifyInstance } from "fastify";
+import type { ChatRequest } from "@repo/types";
 import { streamChat } from "../lib/gemini.js";
 
-type ChatBody = { message: string };
-
 export async function chatRoutes(app: FastifyInstance) {
-  app.post<{ Body: ChatBody }>(
+  app.post<{ Body: ChatRequest }>(
     "/chat",
     {
       schema: {
         body: {
           type: "object",
-          required: ["message"],
+          required: ["messages"],
           properties: {
-            message: { type: "string", minLength: 1, maxLength: 1000 },
+            messages: {
+              type: "array",
+              minItems: 1,
+              items: {
+                type: "object",
+                required: ["role", "content"],
+                properties: {
+                  role: { type: "string", enum: ["user", "assistant"] },
+                  content: { type: "string", minLength: 1, maxLength: 1000 },
+                },
+              },
+            },
           },
         },
       },
     },
     async (request, reply) => {
-      const { message } = request.body;
+      const { messages } = request.body;
 
       reply.raw.setHeader("Content-Type", "text/event-stream");
       reply.raw.setHeader("Cache-Control", "no-cache");
@@ -30,7 +40,7 @@ export async function chatRoutes(app: FastifyInstance) {
       reply.raw.flushHeaders();
 
       try {
-        const stream = await streamChat(message);
+        const stream = streamChat(messages);
 
         for await (const chunk of stream) {
           const text = chunk.text;

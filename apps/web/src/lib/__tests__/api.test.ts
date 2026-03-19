@@ -35,7 +35,7 @@ describe("streamChatResponse", () => {
       createSseStream([JSON.stringify({ text: "Hello" }), JSON.stringify({ text: " world" })])
     );
 
-    const chunks = await collect(streamChatResponse("Hi"));
+    const chunks = await collect(streamChatResponse([{ role: "user", content: "Hi" }]));
     expect(chunks).toEqual(["Hello", " world"]);
   });
 
@@ -44,7 +44,7 @@ describe("streamChatResponse", () => {
       createSseStream([JSON.stringify({ text: "Hello" }), "[DONE]", JSON.stringify({ text: "ignored" })])
     );
 
-    const chunks = await collect(streamChatResponse("Hi"));
+    const chunks = await collect(streamChatResponse([{ role: "user", content: "Hi" }]));
     expect(chunks).toEqual(["Hello"]);
   });
 
@@ -58,7 +58,7 @@ describe("streamChatResponse", () => {
     });
     mockFetch(stream);
 
-    const chunks = await collect(streamChatResponse("Hi"));
+    const chunks = await collect(streamChatResponse([{ role: "user", content: "Hi" }]));
     expect(chunks).toEqual(["Hello"]);
   });
 
@@ -67,14 +67,14 @@ describe("streamChatResponse", () => {
       createSseStream([JSON.stringify({ error: "something went wrong" }), JSON.stringify({ text: "Hello" })])
     );
 
-    const chunks = await collect(streamChatResponse("Hi"));
+    const chunks = await collect(streamChatResponse([{ role: "user", content: "Hi" }]));
     expect(chunks).toEqual(["Hello"]);
   });
 
   it("yields nothing when stream is empty", async () => {
     mockFetch(createSseStream([]));
 
-    const chunks = await collect(streamChatResponse("Hi"));
+    const chunks = await collect(streamChatResponse([{ role: "user", content: "Hi" }]));
     expect(chunks).toEqual([]);
   });
 });

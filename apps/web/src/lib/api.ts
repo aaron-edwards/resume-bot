@@ -1,8 +1,12 @@
-export async function* streamChatResponse(message: string): AsyncGenerator<string> {
+import type { ChatMessage, ChatRequest } from "@repo/types";
+
+export async function* streamChatResponse(messages: ChatMessage[]): AsyncGenerator<string> {
+  const body: ChatRequest = { messages };
+
   const response = await fetch("http://localhost:3001/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message }),
+    body: JSON.stringify(body),
   });
 
   const reader = response.body?.getReader();

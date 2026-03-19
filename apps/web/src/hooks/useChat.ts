@@ -1,19 +1,17 @@
 import { useState } from "react";
+import type { ChatMessage } from "@repo/types";
 import { streamChatResponse } from "../lib/api";
 
-export type Message = {
-  role: "user" | "assistant";
-  content: string;
-};
+export type { ChatMessage };
 
 export type UseChatResponse = {
-  messages: Message[];
+  messages: ChatMessage[];
   isStreaming: boolean;
   sendMessage: (message: string) => Promise<void>;
 };
 
 export function useChat(): UseChatResponse {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
 
   const appendToLastMessage = (text: string) => {
@@ -28,15 +26,17 @@ export function useChat(): UseChatResponse {
   const sendMessage = async (message: string) => {
     if (!message.trim() || isStreaming) return;
 
-    setMessages((prev) => [
-      ...prev,
+    const next: ChatMessage[] = [
+      ...messages,
       { role: "user", content: message },
       { role: "assistant", content: "" },
-    ]);
+    ];
+
+    setMessages(next);
     setIsStreaming(true);
 
     try {
-      for await (const text of streamChatResponse(message)) {
+      for await (const text of streamChatResponse(next.slice(0, -1))) {
         appendToLastMessage(text);
       }
     } finally {

@@ -26,6 +26,9 @@ importers:
       '@google/genai':
         specifier: ^1.46.0
         version: 1.46.0
+      '@repo/types':
+        specifier: workspace:^
+        version: link:../../packages/types
       dotenv:
         specifier: ^17.3.1
         version: 17.3.1
@@ -57,6 +60,9 @@ importers:
       '@fontsource-variable/geist-mono':
         specifier: ^5.2.7
         version: 5.2.7
+      '@repo/types':
+        specifier: workspace:^
+        version: link:../../packages/types
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -106,6 +112,15 @@ importers:
       vitest:
         specifier: ^3.1.4
         version: 3.2.4(@types/node@22.15.3)(happy-dom@20.8.4)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)
+
+  packages/types:
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
 
   packages/typescript-config: {}
 
