@@ -28,9 +28,8 @@ graph TD
     Firestore["Firestore\n(session history)"]
 
     User -->|"types a message"| Web
-    Web -->|"GET /session/:id (on load)"| API
-    API -->|"session messages"| Web
-    Web -->|"POST /chat (message + session ID)"| API
+    Web -->|"GET /session (on load)"| API
+    Web -->|"POST /chat (message)"| API
     API -->|"read/write history"| Firestore
     Resume -->|"injected as system prompt"| API
     API -->|"generateContentStream"| Gemini
@@ -40,7 +39,7 @@ graph TD
 ```
 
 **Request flow:**
-1. On load, the frontend fetches existing session history from `GET /session/:id` (keyed by a UUID stored in `localStorage`)
+1. On load, the frontend fetches existing session history from `GET /session` — the backend identifies the session via an HttpOnly cookie it sets on first visit
 2. User types a message and hits send — only the new message is sent to `POST /chat`
 3. Backend loads the conversation history from Firestore and appends the new message
 4. The resume is injected as a system prompt and the last 10 messages are sent to the Gemini streaming API
@@ -51,17 +50,17 @@ graph TD
 
 ### Technologies
 
-| Layer | Technology |
-|---|---|
-| Frontend | React 19, Vite, TypeScript, Tailwind CSS v4, Shadcn UI, TanStack Query |
-| Backend | Fastify v5, Node.js, TypeScript |
-| LLM | Google Gemini 2.5 Flash (via `@google/genai`) |
-| Streaming | Server-Sent Events (SSE) |
-| Persistence | Firestore (session history), `localStorage` (session ID) |
-| Monorepo | Turborepo + pnpm workspaces |
-| Linting | Biome |
-| Testing | Vitest, @testing-library/react |
-| Hosting | Firebase Hosting (frontend), GCP Cloud Run (backend) |
+| Layer       | Technology                                                             |
+| ----------- | ---------------------------------------------------------------------- |
+| Frontend    | React 19, Vite, TypeScript, Tailwind CSS v4, Shadcn UI, TanStack Query |
+| Backend     | Fastify v5, Node.js, TypeScript                                        |
+| LLM         | Google Gemini 2.5 Flash (via `@google/genai`)                          |
+| Streaming   | Server-Sent Events (SSE)                                               |
+| Persistence | Firestore (session history), HttpOnly cookie (session ID)              |
+| Monorepo    | Turborepo + pnpm workspaces                                            |
+| Linting     | Biome                                                                  |
+| Testing     | Vitest, @testing-library/react                                         |
+| Hosting     | Firebase Hosting (frontend), GCP Cloud Run (backend)                   |
 
 ### Project structure
 
@@ -103,9 +102,10 @@ pnpm test:watch    # Watch mode (run from apps/web or apps/api)
 
 Tests are colocated with source files under `__tests__/` directories and cover:
 
+- End-to-end UI flows via MSW (session load → send → stream → reset)
 - SSE parsing and streaming (`api.ts`)
 - Chat state management, session loading, and error handling (`useChat`)
-- UI components (`MessageBubble`, `Transcript`, `ChatInput`)
+- UI components (`MessageBubble`, `Transcript`, `ChatInput`, `Header`)
 - API route validation, streaming, and session initialisation (`GET /session`, `POST /chat`)
 - Gemini client role mapping and chunk filtering (`gemini.ts`)
 - In-memory session store (`sessions/memory.ts`)
