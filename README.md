@@ -4,6 +4,12 @@
 
 <h1 align="center">ResumeBot</h1>
 
+<p align="center">
+  <a href="https://github.com/aaron-edwards/resume-bot"><img src="https://img.shields.io/github/stars/aaron-edwards/resume-bot?style=social" alt="GitHub stars" /></a>
+  &nbsp;
+  <a href="https://www.linkedin.com/in/aaron-edwards-71520564/"><img src="https://img.shields.io/badge/LinkedIn-Aaron%20Edwards-0A66C2?logo=linkedin&logoColor=white" alt="LinkedIn" /></a>
+</p>
+
 <p align="center">An interactive resume chatbot — ask questions and get answers about my (Aaron Edwards') background, experience, and skills, powered by Google Gemini.</p>
 
 ## Overview
