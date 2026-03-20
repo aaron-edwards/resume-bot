@@ -23,7 +23,7 @@ pnpm format       # Format all files with Biome
 Run a single test file:
 ```sh
 pnpm --filter web vitest run src/__tests__/useChat.test.tsx
-pnpm --filter api vitest run src/__tests__/routes/chat.test.ts
+pnpm --filter api vitest run src/routes/__tests__/chat.test.ts
 ```
 
 ## Architecture
@@ -42,12 +42,12 @@ packages/
 **Request flow:**
 1. Frontend calls `GET /session` on load → gets session cookie (HttpOnly) + conversation history from Firestore
 2. User sends a message → `POST /chat` returns an SSE stream
-3. API loads history from Firestore, appends new message, sends last 10 messages + `resume.md` system prompt to Gemini streaming API
+3. API loads history from Firestore, appends new message, sends last 50 messages + `resume.md` system prompt to Gemini streaming API
 4. Each chunk forwarded as `data: {"text":"..."}`, ending with `data: [DONE]`
 5. On stream completion, full conversation saved back to Firestore
 6. Frontend renders markdown in real time via TanStack Query cache as single source of truth
 
-**Session management:** `session-id` stored as HttpOnly cookie (1-year max-age). Firestore is the primary store; in-memory store is the fallback for local dev without Firebase credentials.
+**Session management:** `session-id` stored as HttpOnly cookie (1-year max-age). Firestore is the primary store; in-memory store is the fallback for local dev without Firebase credentials. Sessions store message history and an optional `userName` (extracted from the first user message via a lightweight Gemini call).
 
 **Streaming:** The `streamChatResponse()` function in `apps/web/src/lib/api.ts` is an async generator that parses SSE chunks. The `useChat` hook drives UI state.
 
@@ -57,6 +57,7 @@ packages/
 GEMINI_API_KEY     Google Gemini API key (required, set in apps/api/.env)
 CORS_ORIGIN        Allowed origin for CORS (production: Firebase Hosting URL)
 VITE_API_URL       Backend URL for frontend build (set at build time)
+SESSION_STORE      Set to "firestore" in production; defaults to in-memory store for local dev
 ```
 
 ## Testing
@@ -70,3 +71,8 @@ VITE_API_URL       Backend URL for frontend build (set at build time)
 
 Biome handles both linting and formatting (replaces ESLint + Prettier). Config in `biome.json`: 2-space indent, 100-char line width, double quotes, trailing commas (ES5). Run `pnpm lint` to check, `pnpm format` to auto-fix formatting.
 
+## Dev Practices
+Before committing make sure to run
+- pnpm lint -- --fix
+- pnpm check-types
+- pnpm test
