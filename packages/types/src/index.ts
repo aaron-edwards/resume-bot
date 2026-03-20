@@ -5,5 +5,4 @@ export type ChatMessage = {
 
 export type ChatRequest = {
   message: string;
-  sessionId?: string;
 };

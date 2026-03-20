@@ -5,28 +5,19 @@ import type React from "react";
 import { createElement } from "react";
 import { useChat } from "../useChat";
 
-const GREETING = vi.hoisted(() => [{ role: "assistant" as const, content: "Hi! I'm Aaron's ResumeBot." }]);
-
 vi.mock("../../lib/api", () => ({
-  getSessionMessages: vi.fn().mockResolvedValue(GREETING),
+  getSessionMessages: vi.fn(),
+  resetSessionRequest: vi.fn(),
   streamChatResponse: vi.fn(),
 }));
 
-import { getSessionMessages, streamChatResponse } from "../../lib/api";
+import { getSessionMessages, resetSessionRequest, streamChatResponse } from "../../lib/api";
+
+const GREETING = vi.hoisted(() => [{ role: "assistant" as const, content: "Hi! I'm Aaron's ResumeBot." }]);
 
 async function* mockStream(chunks: string[]) {
   for (const chunk of chunks) yield chunk;
 }
-
-const localStorageMock = (() => {
-  let store: Record<string, string> = {};
-  return {
-    getItem: (key: string) => store[key] ?? null,
-    setItem: (key: string, value: string) => { store[key] = value; },
-    removeItem: (key: string) => { delete store[key]; },
-    clear: () => { store = {}; },
-  };
-})();
 
 function wrapper({ children }: { children: React.ReactNode }) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -36,20 +27,14 @@ function wrapper({ children }: { children: React.ReactNode }) {
 beforeEach(() => {
   vi.resetAllMocks();
   vi.mocked(getSessionMessages).mockResolvedValue(GREETING);
-  vi.stubGlobal("localStorage", localStorageMock);
-  localStorageMock.clear();
+  vi.mocked(resetSessionRequest).mockResolvedValue(GREETING);
 });
 
 describe("useChat", () => {
   it("shows messages returned from the session store on load", async () => {
-    const greeting = [{ role: "assistant" as const, content: "Hi! I'm Aaron's ResumeBot." }];
-    vi.mocked(getSessionMessages).mockResolvedValue(greeting);
-
     const { result } = renderHook(() => useChat(), { wrapper });
-
     await waitFor(() => expect(result.current.isLoading).toBe(false));
-
-    expect(result.current.messages).toEqual(greeting);
+    expect(result.current.messages).toEqual(GREETING);
   });
 
   it("primes with existing history from the session store", async () => {
@@ -60,7 +45,6 @@ describe("useChat", () => {
     vi.mocked(getSessionMessages).mockResolvedValue(history);
 
     const { result } = renderHook(() => useChat(), { wrapper });
-
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.messages).toEqual(history);
@@ -107,9 +91,6 @@ describe("useChat", () => {
   });
 
   it("does nothing when called with a blank message", async () => {
-    const greeting = [{ role: "assistant" as const, content: "Hi!" }];
-    vi.mocked(getSessionMessages).mockResolvedValue(greeting);
-
     const { result } = renderHook(() => useChat(), { wrapper });
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -139,8 +120,10 @@ describe("useChat", () => {
     expect(result.current.messages[1]).toEqual({ role: "user", content: "Hi" });
   });
 
-  it("resets messages and generates a new session on resetSession", async () => {
+  it("resets messages when resetSession is called", async () => {
     vi.mocked(streamChatResponse).mockReturnValue(mockStream([]));
+    const newGreeting = [{ role: "assistant" as const, content: "Hi again!" }];
+    vi.mocked(resetSessionRequest).mockResolvedValue(newGreeting);
 
     const { result } = renderHook(() => useChat(), { wrapper });
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -148,19 +131,14 @@ describe("useChat", () => {
     await act(async () => {
       await result.current.sendMessage("Hello");
     });
-
     expect(result.current.messages.length).toBeGreaterThan(1);
 
-    const sessionIdBefore = localStorageMock.getItem("resumebot-session-id");
-
-    act(() => {
-      result.current.resetSession();
+    await act(async () => {
+      await result.current.resetSession();
     });
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-
-    const sessionIdAfter = localStorageMock.getItem("resumebot-session-id");
-    expect(sessionIdAfter).not.toBe(sessionIdBefore);
+    expect(result.current.messages).toEqual(newGreeting);
+    expect(result.current.error).toBeNull();
   });
 
   it("clears the error on the next successful send", async () => {

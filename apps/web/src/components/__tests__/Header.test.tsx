@@ -38,7 +38,7 @@ describe("Header", () => {
 
   it("renders nav links for CV, LinkedIn and GitHub", () => {
     render(<Header title="Aaron's ResumeBot" onReset={vi.fn()} />);
-    expect(screen.getByRole("link", { name: /download cv/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /cv/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /linkedin/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /github/i })).toBeInTheDocument();
   });

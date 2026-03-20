@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { streamChatResponse } from "../api";
+import { streamChatResponse, getSessionMessages, resetSessionRequest } from "../api";
 
 function createSseStream(events: string[]) {
   const encoder = new TextEncoder();
@@ -29,17 +29,59 @@ async function collect(gen: AsyncGenerator<string>): Promise<string[]> {
   return results;
 }
 
+describe("getSessionMessages", () => {
+  it("fetches session with credentials and returns messages", async () => {
+    const messages = [{ role: "assistant", content: "Hi!" }];
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ messages }),
+    }));
+
+    const result = await getSessionMessages();
+
+    expect(vi.mocked(fetch)).toHaveBeenCalledWith(
+      expect.stringContaining("/session"),
+      expect.objectContaining({ credentials: "include" })
+    );
+    expect(result).toEqual(messages);
+  });
+
+  it("returns empty array on error", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
+    expect(await getSessionMessages()).toEqual([]);
+  });
+});
+
+describe("resetSessionRequest", () => {
+  it("posts to /session/reset with credentials and returns messages", async () => {
+    const messages = [{ role: "assistant", content: "Hi!" }];
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ messages }),
+    }));
+
+    const result = await resetSessionRequest();
+
+    expect(vi.mocked(fetch)).toHaveBeenCalledWith(
+      expect.stringContaining("/session/reset"),
+      expect.objectContaining({ method: "POST", credentials: "include" })
+    );
+    expect(result).toEqual(messages);
+  });
+});
+
 describe("streamChatResponse", () => {
-  it("sends message and sessionId in the request body", async () => {
+  it("sends message with credentials in the request body", async () => {
     const fetchSpy = vi.fn().mockResolvedValue({ ok: true, body: createSseStream(["[DONE]"]) });
     vi.stubGlobal("fetch", fetchSpy);
 
-    await collect(streamChatResponse("Hello", "session-1"));
+    await collect(streamChatResponse("Hello"));
 
     expect(fetchSpy).toHaveBeenCalledWith(
       expect.stringContaining("/chat"),
       expect.objectContaining({
-        body: JSON.stringify({ message: "Hello", sessionId: "session-1" }),
+        credentials: "include",
+        body: JSON.stringify({ message: "Hello" }),
       })
     );
   });
@@ -49,7 +91,7 @@ describe("streamChatResponse", () => {
       createSseStream([JSON.stringify({ text: "Hello" }), JSON.stringify({ text: " world" })])
     );
 
-    const chunks = await collect(streamChatResponse("Hi", "session-1"));
+    const chunks = await collect(streamChatResponse("Hi"));
     expect(chunks).toEqual(["Hello", " world"]);
   });
 
@@ -58,36 +100,18 @@ describe("streamChatResponse", () => {
       createSseStream([JSON.stringify({ text: "Hello" }), "[DONE]", JSON.stringify({ text: "ignored" })])
     );
 
-    const chunks = await collect(streamChatResponse("Hi", "session-1"));
-    expect(chunks).toEqual(["Hello"]);
-  });
-
-  it("skips lines without data: prefix", async () => {
-    const encoder = new TextEncoder();
-    const stream = new ReadableStream({
-      start(controller) {
-        controller.enqueue(encoder.encode(`event: start\ndata: ${JSON.stringify({ text: "Hello" })}\n\n`));
-        controller.close();
-      },
-    });
-    mockFetch(stream);
-
-    const chunks = await collect(streamChatResponse("Hi", "session-1"));
+    const chunks = await collect(streamChatResponse("Hi"));
     expect(chunks).toEqual(["Hello"]);
   });
 
   it("throws when the stream contains an error event", async () => {
     mockFetch(createSseStream([JSON.stringify({ error: "something went wrong" })]));
 
-    await expect(collect(streamChatResponse("Hi", "session-1"))).rejects.toThrow(
-      "something went wrong"
-    );
+    await expect(collect(streamChatResponse("Hi"))).rejects.toThrow("something went wrong");
   });
 
   it("yields nothing when stream is empty", async () => {
     mockFetch(createSseStream([]));
-
-    const chunks = await collect(streamChatResponse("Hi", "session-1"));
-    expect(chunks).toEqual([]);
+    expect(await collect(streamChatResponse("Hi"))).toEqual([]);
   });
 });

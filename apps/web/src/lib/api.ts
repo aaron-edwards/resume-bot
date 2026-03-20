@@ -11,19 +11,30 @@ function parseSseLine(line: string): SseParsed | "[DONE]" | null {
   return JSON.parse(data) as SseParsed;
 }
 
-export async function getSessionMessages(sessionId: string): Promise<ChatMessage[]> {
-  const response = await fetch(`${apiUrl}/session/${sessionId}`);
+export async function getSessionMessages(): Promise<ChatMessage[]> {
+  const response = await fetch(`${apiUrl}/session`, { credentials: "include" });
   if (!response.ok) return [];
   const data = (await response.json()) as { messages: ChatMessage[] };
   return data.messages;
 }
 
-export async function* streamChatResponse(message: string, sessionId: string): AsyncGenerator<string> {
-  const body: ChatRequest = { message, sessionId };
+export async function resetSessionRequest(): Promise<ChatMessage[]> {
+  const response = await fetch(`${apiUrl}/session/reset`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!response.ok) return [];
+  const data = (await response.json()) as { messages: ChatMessage[] };
+  return data.messages;
+}
+
+export async function* streamChatResponse(message: string): AsyncGenerator<string> {
+  const body: ChatRequest = { message };
 
   const response = await fetch(`${apiUrl}/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify(body),
   });
 

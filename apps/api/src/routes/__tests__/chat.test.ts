@@ -30,14 +30,14 @@ function parseSseEvents(body: string) {
     .map((line) => line.replace(/^data: /, ""));
 }
 
-const validPayload = { message: "Tell me about yourself" };
+const SESSION_COOKIE = "session-id=test-session";
 
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe("GET /session/:sessionId", () => {
-  it("returns messages for a known session", async () => {
+describe("GET /session", () => {
+  it("returns existing messages when a valid session cookie is present", async () => {
     const messages = [
       { role: "user" as const, content: "Hello" },
       { role: "assistant" as const, content: "Hi!" },
@@ -47,76 +47,93 @@ describe("GET /session/:sessionId", () => {
     const app = buildApp();
     const response = await app.inject({
       method: "GET",
-      url: "/session/session-1",
+      url: "/session",
+      headers: { cookie: SESSION_COOKIE },
     });
 
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({ messages });
   });
 
-  it("initialises a new session with the greeting when none exists", async () => {
+  it("initialises a new session with the greeting when no session cookie is present", async () => {
+    const app = buildApp();
+    const response = await app.inject({ method: "GET", url: "/session" });
+
+    expect(response.statusCode).toBe(200);
+    const { messages } = response.json();
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toMatchObject({ role: "assistant" });
+    expect(vi.mocked(sessionStore.saveSession)).toHaveBeenCalled();
+    expect(response.headers["set-cookie"]).toContain("session-id=");
+  });
+
+  it("initialises a new session when the session cookie points to an empty session", async () => {
     vi.mocked(sessionStore.getSession).mockResolvedValue([]);
 
     const app = buildApp();
     const response = await app.inject({
       method: "GET",
-      url: "/session/new-session",
+      url: "/session",
+      headers: { cookie: SESSION_COOKIE },
+    });
+
+    const { messages } = response.json();
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toMatchObject({ role: "assistant" });
+    expect(response.headers["set-cookie"]).toContain("session-id=");
+  });
+});
+
+describe("POST /session/reset", () => {
+  it("creates a new session, sets a new cookie, and returns the greeting", async () => {
+    const app = buildApp();
+    const response = await app.inject({
+      method: "POST",
+      url: "/session/reset",
+      headers: { cookie: SESSION_COOKIE },
     });
 
     expect(response.statusCode).toBe(200);
     const { messages } = response.json();
     expect(messages).toHaveLength(1);
     expect(messages[0]).toMatchObject({ role: "assistant" });
-    expect(vi.mocked(sessionStore.saveSession)).toHaveBeenCalledWith(
-      "new-session",
-      expect.any(String),
-      messages
-    );
+    expect(vi.mocked(sessionStore.saveSession)).toHaveBeenCalled();
+    expect(response.headers["set-cookie"]).toContain("session-id=");
   });
 });
 
 describe("POST /chat", () => {
   it("streams chunks as SSE events and ends with [DONE]", async () => {
     mockResolved(["Hello", " world"]);
+    vi.mocked(sessionStore.getSession).mockResolvedValue([{ role: "user" as const, content: "prev" }]);
 
     const app = buildApp();
     const response = await app.inject({
       method: "POST",
       url: "/chat",
-      payload: validPayload,
+      headers: { cookie: SESSION_COOKIE },
+      payload: { message: "Tell me about yourself" },
     });
 
     expect(response.statusCode).toBe(200);
     expect(response.headers["content-type"]).toBe("text/event-stream");
-
     const events = parseSseEvents(response.body);
     expect(events).toEqual(['{"text":"Hello"}', '{"text":" world"}', "[DONE]"]);
   });
 
-  it("appends message to empty history when no session exists", async () => {
-    mockResolved([]);
-    vi.mocked(sessionStore.getSession).mockResolvedValue([]);
-
-    const app = buildApp();
-    await app.inject({ method: "POST", url: "/chat", payload: validPayload });
-
-    expect(vi.mocked(streamChat)).toHaveBeenCalledWith([
-      { role: "user", content: "Tell me about yourself" },
-    ]);
-  });
-
-  it("appends message to existing history from store", async () => {
+  it("appends message to history loaded from session store", async () => {
     mockResolved([]);
     vi.mocked(sessionStore.getSession).mockResolvedValue([
-      { role: "user", content: "Hello" },
-      { role: "assistant", content: "Hi there!" },
+      { role: "user" as const, content: "Hello" },
+      { role: "assistant" as const, content: "Hi there!" },
     ]);
 
     const app = buildApp();
     await app.inject({
       method: "POST",
       url: "/chat",
-      payload: { message: "How are you?", sessionId: "session-1" },
+      headers: { cookie: SESSION_COOKIE },
+      payload: { message: "How are you?" },
     });
 
     expect(vi.mocked(streamChat)).toHaveBeenCalledWith([
@@ -138,30 +155,32 @@ describe("POST /chat", () => {
     await app.inject({
       method: "POST",
       url: "/chat",
-      payload: { message: "new message", sessionId: "session-1" },
+      headers: { cookie: SESSION_COOKIE },
+      payload: { message: "new message" },
     });
 
     const calledWith = vi.mocked(streamChat).mock.calls[0]?.[0];
-    expect(calledWith).toHaveLength(11); // 10 history + 1 new message
-    expect(calledWith?.[0]).toEqual(longHistory[2]); // oldest 2 trimmed
+    expect(calledWith).toHaveLength(11);
+    expect(calledWith?.[0]).toEqual(longHistory[2]);
   });
 
   it("saves the full conversation after streaming completes", async () => {
     mockResolved(["Hello", " world"]);
     vi.mocked(sessionStore.getSession).mockResolvedValue([
-      { role: "user", content: "previous" },
-      { role: "assistant", content: "response" },
+      { role: "user" as const, content: "previous" },
+      { role: "assistant" as const, content: "response" },
     ]);
 
     const app = buildApp();
     await app.inject({
       method: "POST",
       url: "/chat",
-      payload: { message: "new message", sessionId: "session-1" },
+      headers: { cookie: SESSION_COOKIE },
+      payload: { message: "new message" },
     });
 
     expect(vi.mocked(sessionStore.saveSession)).toHaveBeenCalledWith(
-      "session-1",
+      "test-session",
       expect.any(String),
       [
         { role: "user", content: "previous" },
@@ -172,11 +191,15 @@ describe("POST /chat", () => {
     );
   });
 
-  it("does not call getSession or saveSession when no sessionId", async () => {
+  it("proceeds without history when no session cookie is present", async () => {
     mockResolved([]);
 
     const app = buildApp();
-    await app.inject({ method: "POST", url: "/chat", payload: validPayload });
+    await app.inject({
+      method: "POST",
+      url: "/chat",
+      payload: { message: "Hello" },
+    });
 
     expect(vi.mocked(sessionStore.getSession)).not.toHaveBeenCalled();
     expect(vi.mocked(sessionStore.saveSession)).not.toHaveBeenCalled();
@@ -193,7 +216,8 @@ describe("POST /chat", () => {
       const response = await app.inject({
         method: "POST",
         url: "/chat",
-        payload: validPayload,
+        headers: { cookie: SESSION_COOKIE },
+        payload: { message: "Hello" },
       });
 
       const events = parseSseEvents(response.body);
@@ -207,7 +231,6 @@ describe("POST /chat", () => {
         url: "/chat",
         payload: {},
       });
-
       expect(response.statusCode).toBe(400);
     });
 
@@ -218,7 +241,6 @@ describe("POST /chat", () => {
         url: "/chat",
         payload: { message: "a".repeat(1001) },
       });
-
       expect(response.statusCode).toBe(400);
     });
   });
