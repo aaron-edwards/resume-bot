@@ -25,9 +25,13 @@ graph TD
     API["Backend\nFastify\nCloud Run"]
     Gemini["Google Gemini API"]
     Resume["resume.md\n(system prompt)"]
+    Firestore["Firestore\n(session history)"]
 
     User -->|"types a message"| Web
-    Web -->|"POST /chat (full history)"| API
+    Web -->|"GET /session/:id (on load)"| API
+    API -->|"session messages"| Web
+    Web -->|"POST /chat (message + session ID)"| API
+    API -->|"read/write history"| Firestore
     Resume -->|"injected as system prompt"| API
     API -->|"generateContentStream"| Gemini
     Gemini -->|"streamed chunks"| API
@@ -36,21 +40,24 @@ graph TD
 ```
 
 **Request flow:**
-1. User types a message and hits send
-2. Frontend POSTs the full message history to `POST /chat`
-3. Backend injects the resume as a system prompt and calls the Gemini streaming API
-4. Each chunk is forwarded to the browser as an SSE event (`data: {"text":"..."}`)
-5. Frontend appends each chunk to the assistant message in real time
-6. Stream ends with `data: [DONE]`
+1. On load, the frontend fetches existing session history from `GET /session/:id` (keyed by a UUID stored in `localStorage`)
+2. User types a message and hits send — only the new message is sent to `POST /chat`
+3. Backend loads the conversation history from Firestore and appends the new message
+4. The resume is injected as a system prompt and the last 10 messages are sent to the Gemini streaming API
+5. Each chunk is forwarded to the browser as an SSE event (`data: {"text":"..."}`)
+6. Frontend appends each chunk to the assistant message in real time
+7. On completion, the full updated conversation is saved back to Firestore
+8. Stream ends with `data: [DONE]`
 
 ### Technologies
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 19, Vite, TypeScript, Tailwind CSS v4, Shadcn UI |
+| Frontend | React 19, Vite, TypeScript, Tailwind CSS v4, Shadcn UI, TanStack Query |
 | Backend | Fastify v5, Node.js, TypeScript |
 | LLM | Google Gemini 2.5 Flash (via `@google/genai`) |
 | Streaming | Server-Sent Events (SSE) |
+| Persistence | Firestore (session history), `localStorage` (session ID) |
 | Monorepo | Turborepo + pnpm workspaces |
 | Linting | Biome |
 | Testing | Vitest, @testing-library/react |
@@ -97,10 +104,11 @@ pnpm test:watch    # Watch mode (run from apps/web or apps/api)
 Tests are colocated with source files under `__tests__/` directories and cover:
 
 - SSE parsing and streaming (`api.ts`)
-- Chat state management and error handling (`useChat`)
+- Chat state management, session loading, and error handling (`useChat`)
 - UI components (`MessageBubble`, `Transcript`, `ChatInput`)
-- API route validation and streaming (`POST /chat`)
+- API route validation, streaming, and session initialisation (`GET /session`, `POST /chat`)
 - Gemini client role mapping and chunk filtering (`gemini.ts`)
+- In-memory session store (`sessions/memory.ts`)
 
 ### Other commands
 

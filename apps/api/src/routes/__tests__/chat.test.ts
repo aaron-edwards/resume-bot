@@ -36,6 +36,45 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
+describe("GET /session/:sessionId", () => {
+  it("returns messages for a known session", async () => {
+    const messages = [
+      { role: "user" as const, content: "Hello" },
+      { role: "assistant" as const, content: "Hi!" },
+    ];
+    vi.mocked(sessionStore.getSession).mockResolvedValue(messages);
+
+    const app = buildApp();
+    const response = await app.inject({
+      method: "GET",
+      url: "/session/session-1",
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ messages });
+  });
+
+  it("initialises a new session with the greeting when none exists", async () => {
+    vi.mocked(sessionStore.getSession).mockResolvedValue([]);
+
+    const app = buildApp();
+    const response = await app.inject({
+      method: "GET",
+      url: "/session/new-session",
+    });
+
+    expect(response.statusCode).toBe(200);
+    const { messages } = response.json();
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toMatchObject({ role: "assistant" });
+    expect(vi.mocked(sessionStore.saveSession)).toHaveBeenCalledWith(
+      "new-session",
+      expect.any(String),
+      messages
+    );
+  });
+});
+
 describe("POST /chat", () => {
   it("streams chunks as SSE events and ends with [DONE]", async () => {
     mockResolved(["Hello", " world"]);

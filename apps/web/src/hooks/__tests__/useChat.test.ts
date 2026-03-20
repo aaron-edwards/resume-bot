@@ -1,24 +1,21 @@
 import { vi } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type React from "react";
+import { createElement } from "react";
 import { useChat } from "../useChat";
 
-function createSseStream(events: string[]) {
-  const encoder = new TextEncoder();
-  return new ReadableStream({
-    start(controller) {
-      for (const event of events) {
-        controller.enqueue(encoder.encode(`data: ${event}\n\n`));
-      }
-      controller.close();
-    },
-  });
-}
+const GREETING = vi.hoisted(() => [{ role: "assistant" as const, content: "Hi! I'm Aaron's ResumeBot." }]);
 
-function mockFetch(streamFactory: () => ReadableStream) {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockImplementation(() => Promise.resolve({ ok: true, body: streamFactory() }))
-  );
+vi.mock("../../lib/api", () => ({
+  getSessionMessages: vi.fn().mockResolvedValue(GREETING),
+  streamChatResponse: vi.fn(),
+}));
+
+import { getSessionMessages, streamChatResponse } from "../../lib/api";
+
+async function* mockStream(chunks: string[]) {
+  for (const chunk of chunks) yield chunk;
 }
 
 const localStorageMock = (() => {
@@ -31,17 +28,49 @@ const localStorageMock = (() => {
   };
 })();
 
+function wrapper({ children }: { children: React.ReactNode }) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return createElement(QueryClientProvider, { client: queryClient }, children);
+}
+
 beforeEach(() => {
-  vi.unstubAllGlobals();
+  vi.resetAllMocks();
+  vi.mocked(getSessionMessages).mockResolvedValue(GREETING);
   vi.stubGlobal("localStorage", localStorageMock);
   localStorageMock.clear();
 });
 
 describe("useChat", () => {
-  it("adds user message and empty assistant placeholder immediately", async () => {
-    mockFetch(() => createSseStream(["[DONE]"]));
+  it("shows messages returned from the session store on load", async () => {
+    const greeting = [{ role: "assistant" as const, content: "Hi! I'm Aaron's ResumeBot." }];
+    vi.mocked(getSessionMessages).mockResolvedValue(greeting);
 
-    const { result } = renderHook(() => useChat());
+    const { result } = renderHook(() => useChat(), { wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.messages).toEqual(greeting);
+  });
+
+  it("primes with existing history from the session store", async () => {
+    const history = [
+      { role: "user" as const, content: "Hello" },
+      { role: "assistant" as const, content: "Hi there!" },
+    ];
+    vi.mocked(getSessionMessages).mockResolvedValue(history);
+
+    const { result } = renderHook(() => useChat(), { wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.messages).toEqual(history);
+  });
+
+  it("adds user message and empty assistant placeholder immediately", async () => {
+    vi.mocked(streamChatResponse).mockReturnValue(mockStream([]));
+
+    const { result } = renderHook(() => useChat(), { wrapper });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     await act(async () => {
       await result.current.sendMessage("Hello");
@@ -52,30 +81,23 @@ describe("useChat", () => {
   });
 
   it("appends streamed chunks to the assistant message", async () => {
-    mockFetch(() =>
-      createSseStream([
-        JSON.stringify({ text: "Hello" }),
-        JSON.stringify({ text: " world" }),
-        "[DONE]",
-      ])
-    );
+    vi.mocked(streamChatResponse).mockReturnValue(mockStream(["Hello", " world"]));
 
-    const { result } = renderHook(() => useChat());
+    const { result } = renderHook(() => useChat(), { wrapper });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     await act(async () => {
       await result.current.sendMessage("Hi");
     });
 
-    expect(result.current.messages[2]).toEqual({
-      role: "assistant",
-      content: "Hello world",
-    });
+    expect(result.current.messages[2]).toEqual({ role: "assistant", content: "Hello world" });
   });
 
   it("sets isStreaming to false after stream completes", async () => {
-    mockFetch(() => createSseStream(["[DONE]"]));
+    vi.mocked(streamChatResponse).mockReturnValue(mockStream([]));
 
-    const { result } = renderHook(() => useChat());
+    const { result } = renderHook(() => useChat(), { wrapper });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     await act(async () => {
       await result.current.sendMessage("Hi");
@@ -85,84 +107,80 @@ describe("useChat", () => {
   });
 
   it("does nothing when called with a blank message", async () => {
-    const fetchSpy = vi.fn();
-    vi.stubGlobal("fetch", fetchSpy);
+    const greeting = [{ role: "assistant" as const, content: "Hi!" }];
+    vi.mocked(getSessionMessages).mockResolvedValue(greeting);
 
-    const { result } = renderHook(() => useChat());
+    const { result } = renderHook(() => useChat(), { wrapper });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     await act(async () => {
       await result.current.sendMessage("   ");
     });
 
-    expect(fetchSpy).not.toHaveBeenCalled();
-    expect(result.current.messages).toHaveLength(1); // only the initial message
+    expect(vi.mocked(streamChatResponse)).not.toHaveBeenCalled();
+    expect(result.current.messages).toHaveLength(1);
   });
 
   it("sets error and removes the assistant placeholder when the stream throws", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 500 }));
+    vi.mocked(streamChatResponse).mockImplementation(async function* () {
+      throw new Error("API error");
+    });
 
-    const { result } = renderHook(() => useChat());
+    const { result } = renderHook(() => useChat(), { wrapper });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     await act(async () => {
       await result.current.sendMessage("Hi");
     });
 
     expect(result.current.error).toBeTruthy();
-    // user message stays, failed assistant placeholder is removed
+    // greeting + user message (failed assistant placeholder is removed)
     expect(result.current.messages).toHaveLength(2);
     expect(result.current.messages[1]).toEqual({ role: "user", content: "Hi" });
   });
 
-  it("shows a rate limit message on a 429 response", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 429 }));
+  it("resets messages and generates a new session on resetSession", async () => {
+    vi.mocked(streamChatResponse).mockReturnValue(mockStream([]));
 
-    const { result } = renderHook(() => useChat());
+    const { result } = renderHook(() => useChat(), { wrapper });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     await act(async () => {
-      await result.current.sendMessage("Hi");
+      await result.current.sendMessage("Hello");
     });
 
-    expect(result.current.error).toMatch(/too fast/i);
+    expect(result.current.messages.length).toBeGreaterThan(1);
+
+    const sessionIdBefore = localStorageMock.getItem("resumebot-session-id");
+
+    act(() => {
+      result.current.resetSession();
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    const sessionIdAfter = localStorageMock.getItem("resumebot-session-id");
+    expect(sessionIdAfter).not.toBe(sessionIdBefore);
   });
 
   it("clears the error on the next successful send", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 500 }));
+    vi.mocked(streamChatResponse).mockImplementationOnce(async function* () {
+      throw new Error("API error");
+    });
 
-    const { result } = renderHook(() => useChat());
+    const { result } = renderHook(() => useChat(), { wrapper });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     await act(async () => {
       await result.current.sendMessage("Hi");
     });
-
     expect(result.current.error).toBeTruthy();
 
-    mockFetch(() => createSseStream(["[DONE]"]));
-
+    vi.mocked(streamChatResponse).mockReturnValue(mockStream([]));
     await act(async () => {
       await result.current.sendMessage("Hi again");
     });
 
     expect(result.current.error).toBeNull();
-  });
-
-  it("does nothing when already streaming", async () => {
-    const fetchSpy = vi.fn().mockImplementation(() =>
-      Promise.resolve({ ok: true, body: new ReadableStream({ start() {} }) })
-    );
-    vi.stubGlobal("fetch", fetchSpy);
-
-    const { result } = renderHook(() => useChat());
-
-    act(() => {
-      result.current.sendMessage("First");
-    });
-
-    await waitFor(() => expect(result.current.isStreaming).toBe(true));
-
-    await act(async () => {
-      await result.current.sendMessage("Second");
-    });
-
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 });

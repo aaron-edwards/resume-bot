@@ -1,9 +1,37 @@
 import type { FastifyInstance } from "fastify";
-import type { ChatRequest } from "@repo/types";
+import type { ChatMessage, ChatRequest } from "@repo/types";
 import { streamChat } from "../lib/gemini.js";
 import { sessionStore } from "../lib/sessions/index.js";
 
 export async function chatRoutes(app: FastifyInstance) {
+  app.get<{ Params: { sessionId: string } }>(
+    "/session/:sessionId",
+    {
+      schema: {
+        params: {
+          type: "object",
+          required: ["sessionId"],
+          properties: { sessionId: { type: "string" } },
+        },
+      },
+    },
+    async (request, reply) => {
+      const { sessionId } = request.params;
+      const ip = (request.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim()
+        ?? request.ip
+        ?? "unknown";
+
+      let messages: ChatMessage[] = await sessionStore.getSession(sessionId);
+
+      if (messages.length === 0) {
+        messages = [{ role: "assistant", content: "Hi! I'm Aaron's ResumeBot. What would you like to know about Aaron?" }];
+        await sessionStore.saveSession(sessionId, ip, messages);
+      }
+
+      return reply.send({ messages });
+    }
+  );
+
   app.post<{ Body: ChatRequest }>(
     "/chat",
     {

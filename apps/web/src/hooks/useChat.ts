@@ -1,42 +1,57 @@
 import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ChatMessage } from "@repo/types";
-import { streamChatResponse } from "../lib/api";
+import { getSessionMessages, streamChatResponse } from "../lib/api";
 
 export type { ChatMessage };
 
 export type UseChatResponse = {
   messages: ChatMessage[];
+  isLoading: boolean;
   isStreaming: boolean;
   error: string | null;
   sendMessage: (message: string) => Promise<void>;
+  resetSession: () => void;
 };
 
-const INITIAL_MESSAGE: ChatMessage = {
-  role: "assistant",
-  content: "Hi! I'm Aaron's ResumeBot. What would you like to know about Aaron?",
-};
+const SESSION_KEY = "resumebot-session-id";
 
 function getSessionId(): string {
-  const key = "resumebot-session-id";
-  const existing = localStorage.getItem(key);
+  const existing = localStorage.getItem(SESSION_KEY);
   if (existing) return existing;
   const id = crypto.randomUUID();
-  localStorage.setItem(key, id);
+  localStorage.setItem(SESSION_KEY, id);
+  return id;
+}
+
+function createSessionId(): string {
+  const id = crypto.randomUUID();
+  localStorage.setItem(SESSION_KEY, id);
   return id;
 }
 
 export function useChat(): UseChatResponse {
-  const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
+  const queryClient = useQueryClient();
+  const [sessionId, setSessionId] = useState(() => getSessionId());
+
+  const { data: history, isLoading } = useQuery({
+    queryKey: ["session", sessionId],
+    queryFn: () => getSessionMessages(sessionId),
+    staleTime: Number.POSITIVE_INFINITY,
+  });
+
+  const initialMessages = history ?? [];
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const sendMessage = async (message: string) => {
-    if (!message.trim() || isStreaming) return;
+  const displayMessages = messages.length > 0 ? messages : initialMessages;
 
-    const sessionId = getSessionId();
+  const sendMessage = async (message: string) => {
+    if (!message.trim() || isStreaming || isLoading) return;
 
     const next: ChatMessage[] = [
-      ...messages,
+      ...displayMessages,
       { role: "user", content: message },
       { role: "assistant", content: "" },
     ];
@@ -62,5 +77,13 @@ export function useChat(): UseChatResponse {
     }
   };
 
-  return { messages, isStreaming, error, sendMessage };
+  const resetSession = () => {
+    const newId = createSessionId();
+    setMessages([]);
+    setError(null);
+    queryClient.removeQueries({ queryKey: ["session", sessionId] });
+    setSessionId(newId);
+  };
+
+  return { messages: displayMessages, isLoading, isStreaming, error, sendMessage, resetSession };
 }
