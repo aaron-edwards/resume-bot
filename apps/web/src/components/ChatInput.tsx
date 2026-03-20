@@ -50,6 +50,7 @@ export function ChatInput({ onSend, isStreaming }: ChatInputProps) {
           disabled={!input.trim() || isStreaming}
           variant="default"
           size="icon"
+          aria-label="Send"
           className="absolute bottom-2 right-2"
         >
           <SendHorizontal className="h-4 w-4" />

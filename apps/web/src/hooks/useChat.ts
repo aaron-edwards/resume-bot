@@ -14,32 +14,28 @@ export type UseChatResponse = {
   resetSession: () => Promise<void>;
 };
 
+const SESSION_QUERY_KEY = ["session"];
+
 export function useChat(): UseChatResponse {
   const queryClient = useQueryClient();
 
-  const { data: history, isLoading } = useQuery({
-    queryKey: ["session"],
+  const { data: messages = [], isLoading } = useQuery({
+    queryKey: SESSION_QUERY_KEY,
     queryFn: getSessionMessages,
     staleTime: Number.POSITIVE_INFINITY,
   });
 
-  const initialMessages = history ?? [];
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const displayMessages = messages.length > 0 ? messages : initialMessages;
+  const setMessages = (updater: (prev: ChatMessage[]) => ChatMessage[]) => {
+    queryClient.setQueryData<ChatMessage[]>(SESSION_QUERY_KEY, (prev = []) => updater(prev));
+  };
 
   const sendMessage = async (message: string) => {
     if (!message.trim() || isStreaming || isLoading) return;
 
-    const next: ChatMessage[] = [
-      ...displayMessages,
-      { role: "user", content: message },
-      { role: "assistant", content: "" },
-    ];
-
-    setMessages(next);
+    setMessages((prev) => [...prev, { role: "user", content: message }, { role: "assistant", content: "" }]);
     setIsStreaming(true);
     setError(null);
 
@@ -61,11 +57,10 @@ export function useChat(): UseChatResponse {
   };
 
   const resetSession = async () => {
-    const messages = await resetSessionRequest();
-    queryClient.setQueryData(["session"], messages);
-    setMessages([]);
+    const newMessages = await resetSessionRequest();
+    setMessages(() => newMessages);
     setError(null);
   };
 
-  return { messages: displayMessages, isLoading, isStreaming, error, sendMessage, resetSession };
+  return { messages, isLoading, isStreaming, error, sendMessage, resetSession };
 }
