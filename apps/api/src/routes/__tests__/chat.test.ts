@@ -93,7 +93,10 @@ describe("POST /chat", () => {
       role: i % 2 === 0 ? ("user" as const) : ("assistant" as const),
       content: `message ${i}`,
     }));
-    vi.mocked(sessionStore.getSession).mockResolvedValue({ messages: history, userName: undefined });
+    vi.mocked(sessionStore.getSession).mockResolvedValue({
+      messages: history,
+      userName: undefined,
+    });
 
     const app = buildApp();
     await app.inject({

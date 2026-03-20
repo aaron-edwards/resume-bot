@@ -100,15 +100,7 @@ pnpm test          # Run all tests once
 pnpm test:watch    # Watch mode (run from apps/web or apps/api)
 ```
 
-Tests are colocated with source files under `__tests__/` directories and cover:
-
-- End-to-end UI flows via MSW (session load → send → stream → reset)
-- SSE parsing and streaming (`api.ts`)
-- Chat state management, session loading, and error handling (`useChat`)
-- UI components (`MessageBubble`, `Transcript`, `ChatInput`, `Header`)
-- API route validation, streaming, and session initialisation (`GET /session`, `POST /chat`)
-- Gemini client role mapping and chunk filtering (`gemini.ts`)
-- In-memory session store (`sessions/memory.ts`)
+Tests are colocated with source files under `__tests__/` directories
 
 ### Other commands
 

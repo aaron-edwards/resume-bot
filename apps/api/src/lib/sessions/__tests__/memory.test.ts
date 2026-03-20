@@ -10,7 +10,10 @@ beforeEach(async () => {
 
 describe("memorySessionStore", () => {
   it("returns empty messages and no userName for unknown session", async () => {
-    expect(await memorySessionStore.getSession("unknown")).toEqual({ messages: [], userName: undefined });
+    expect(await memorySessionStore.getSession("unknown")).toEqual({
+      messages: [],
+      userName: undefined,
+    });
   });
 
   it("saves and retrieves messages", async () => {
@@ -20,7 +23,10 @@ describe("memorySessionStore", () => {
     ];
 
     await memorySessionStore.saveSession("session-1", "127.0.0.1", messages);
-    expect(await memorySessionStore.getSession("session-1")).toEqual({ messages, userName: undefined });
+    expect(await memorySessionStore.getSession("session-1")).toEqual({
+      messages,
+      userName: undefined,
+    });
   });
 
   it("updates messages on subsequent saves", async () => {
@@ -33,13 +39,19 @@ describe("memorySessionStore", () => {
     await memorySessionStore.saveSession("session-1", "127.0.0.1", initial);
     await memorySessionStore.saveSession("session-1", "127.0.0.1", updated);
 
-    expect(await memorySessionStore.getSession("session-1")).toEqual({ messages: updated, userName: undefined });
+    expect(await memorySessionStore.getSession("session-1")).toEqual({
+      messages: updated,
+      userName: undefined,
+    });
   });
 
   it("saves and retrieves userName", async () => {
     const messages = [{ role: "user" as const, content: "I'm Alex" }];
     await memorySessionStore.saveSession("session-1", "127.0.0.1", messages, "Alex");
-    expect(await memorySessionStore.getSession("session-1")).toEqual({ messages, userName: "Alex" });
+    expect(await memorySessionStore.getSession("session-1")).toEqual({
+      messages,
+      userName: "Alex",
+    });
   });
 
   it("preserves userName on update when not provided", async () => {
@@ -47,7 +59,10 @@ describe("memorySessionStore", () => {
     await memorySessionStore.saveSession("session-1", "127.0.0.1", messages, "Alex");
     const updated = [...messages, { role: "assistant" as const, content: "Hi Alex!" }];
     await memorySessionStore.saveSession("session-1", "127.0.0.1", updated);
-    expect(await memorySessionStore.getSession("session-1")).toEqual({ messages: updated, userName: "Alex" });
+    expect(await memorySessionStore.getSession("session-1")).toEqual({
+      messages: updated,
+      userName: "Alex",
+    });
   });
 
   it("isolates sessions from each other", async () => {
