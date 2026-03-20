@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { streamChatResponse, getSessionMessages, resetSessionRequest } from "../api";
+import { getSessionMessages, resetSessionRequest, streamChatResponse } from "../api";
 
 function createSseStream(events: string[]) {
   const encoder = new TextEncoder();
@@ -32,10 +32,13 @@ async function collect(gen: AsyncGenerator<string>): Promise<string[]> {
 describe("getSessionMessages", () => {
   it("fetches session with credentials and returns messages", async () => {
     const messages = [{ role: "assistant", content: "Hi!" }];
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ messages }),
-    }));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ messages }),
+      })
+    );
 
     const result = await getSessionMessages();
 
@@ -55,10 +58,13 @@ describe("getSessionMessages", () => {
 describe("resetSessionRequest", () => {
   it("posts to /session/reset with credentials and returns messages", async () => {
     const messages = [{ role: "assistant", content: "Hi!" }];
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ messages }),
-    }));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ messages }),
+      })
+    );
 
     const result = await resetSessionRequest();
 
@@ -97,7 +103,11 @@ describe("streamChatResponse", () => {
 
   it("stops yielding at [DONE]", async () => {
     mockFetch(
-      createSseStream([JSON.stringify({ text: "Hello" }), "[DONE]", JSON.stringify({ text: "ignored" })])
+      createSseStream([
+        JSON.stringify({ text: "Hello" }),
+        "[DONE]",
+        JSON.stringify({ text: "ignored" }),
+      ])
     );
 
     const chunks = await collect(streamChatResponse("Hi"));

@@ -1,8 +1,8 @@
-import { vi } from "vitest";
-import { act, renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import type React from "react";
 import { createElement } from "react";
+import { vi } from "vitest";
 import { useChat } from "../useChat";
 
 vi.mock("../../lib/api", () => ({
@@ -13,7 +13,9 @@ vi.mock("../../lib/api", () => ({
 
 import { getSessionMessages, resetSessionRequest, streamChatResponse } from "../../lib/api";
 
-const GREETING = vi.hoisted(() => [{ role: "assistant" as const, content: "Hi! I'm Aaron's ResumeBot." }]);
+const GREETING = vi.hoisted(() => [
+  { role: "assistant" as const, content: "Hi! I'm Aaron's ResumeBot." },
+]);
 
 async function* mockStream(chunks: string[]) {
   for (const chunk of chunks) yield chunk;
@@ -103,6 +105,7 @@ describe("useChat", () => {
   });
 
   it("sets error and removes the assistant placeholder when the stream throws", async () => {
+    // biome-ignore lint/correctness/useYield: generator throws before reaching any yield
     vi.mocked(streamChatResponse).mockImplementation(async function* () {
       throw new Error("API error");
     });
@@ -142,6 +145,7 @@ describe("useChat", () => {
   });
 
   it("clears the error on the next successful send", async () => {
+    // biome-ignore lint/correctness/useYield: generator throws before reaching any yield
     vi.mocked(streamChatResponse).mockImplementationOnce(async function* () {
       throw new Error("API error");
     });

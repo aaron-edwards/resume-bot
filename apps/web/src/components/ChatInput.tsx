@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
-import { SendHorizontal } from "lucide-react";
 import { Button } from "@repo/ui/button";
 import { Textarea } from "@repo/ui/textarea";
+import { SendHorizontal } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 type ChatInputProps = {
   onSend: (message: string) => void;
@@ -59,7 +59,9 @@ export function ChatInput({ onSend, isStreaming }: ChatInputProps) {
         <span className="text-xs text-muted-foreground">
           ResumeBot can make mistakes. Consider verifying important information.
         </span>
-        <span className={`text-xs shrink-0 ml-2 ${input.length >= 1000 ? "text-destructive" : "text-muted-foreground"} ${input.length <= 800 ? "invisible" : ""}`}>
+        <span
+          className={`text-xs shrink-0 ml-2 ${input.length >= 1000 ? "text-destructive" : "text-muted-foreground"} ${input.length <= 800 ? "invisible" : ""}`}
+        >
           {input.length}/1000
         </span>
       </div>

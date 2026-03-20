@@ -1,7 +1,9 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 @source "../../../packages/ui/src";
+/* biome-ignore lint/correctness/noInvalidPositionAtImportRule: Tailwind v4 allows @import after @plugin/@source */
 @import "@fontsource-variable/geist";
+/* biome-ignore lint/correctness/noInvalidPositionAtImportRule: Tailwind v4 allows @import after @plugin/@source */
 @import "@fontsource-variable/geist-mono";
 
 @custom-variant dark (&:is(.dark *));

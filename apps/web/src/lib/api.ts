@@ -39,7 +39,8 @@ export async function* streamChatResponse(message: string): AsyncGenerator<strin
   });
 
   if (!response.ok) {
-    if (response.status === 429) throw new Error("You're sending messages too fast. Please wait a moment and try again.");
+    if (response.status === 429)
+      throw new Error("You're sending messages too fast. Please wait a moment and try again.");
     throw new Error(`Something went wrong (${response.status}). Please try again.`);
   }
 

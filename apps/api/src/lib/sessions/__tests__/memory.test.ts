@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 // Re-import the module fresh for each test to reset the in-memory store
 let memorySessionStore: typeof import("../memory.js")["memorySessionStore"];
@@ -37,10 +37,18 @@ describe("memorySessionStore", () => {
   });
 
   it("isolates sessions from each other", async () => {
-    await memorySessionStore.saveSession("session-1", "1.1.1.1", [{ role: "user" as const, content: "A" }]);
-    await memorySessionStore.saveSession("session-2", "2.2.2.2", [{ role: "user" as const, content: "B" }]);
+    await memorySessionStore.saveSession("session-1", "1.1.1.1", [
+      { role: "user" as const, content: "A" },
+    ]);
+    await memorySessionStore.saveSession("session-2", "2.2.2.2", [
+      { role: "user" as const, content: "B" },
+    ]);
 
-    expect(await memorySessionStore.getSession("session-1")).toEqual([{ role: "user", content: "A" }]);
-    expect(await memorySessionStore.getSession("session-2")).toEqual([{ role: "user", content: "B" }]);
+    expect(await memorySessionStore.getSession("session-1")).toEqual([
+      { role: "user", content: "A" },
+    ]);
+    expect(await memorySessionStore.getSession("session-2")).toEqual([
+      { role: "user", content: "B" },
+    ]);
   });
 });

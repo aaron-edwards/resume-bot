@@ -19,17 +19,21 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
   const label = isUser ? "You" : "ResumeBot";
 
   return (
-    <li aria-label={label} className={`flex flex-col gap-1 ${isUser ? "items-end" : "items-start"}`}>
+    <li
+      aria-label={label}
+      className={`flex flex-col gap-1 ${isUser ? "items-end" : "items-start"}`}
+    >
       <span className="text-xs text-muted-foreground" aria-hidden="true">
         {label}
       </span>
       <div className={`${baseBubbleClass} ${isUser ? userBubbleClass : assistantBubbleClass}`}>
-        {isUser
-          ? message.content
-          : showTypingIndicator
-            ? <TypingIndicator />
-            : <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
-        }
+        {isUser ? (
+          message.content
+        ) : showTypingIndicator ? (
+          <TypingIndicator />
+        ) : (
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+        )}
       </div>
     </li>
   );

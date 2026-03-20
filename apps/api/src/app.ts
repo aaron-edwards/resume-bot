@@ -1,5 +1,5 @@
-import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
+import cors from "@fastify/cors";
 import rateLimit from "@fastify/rate-limit";
 import Fastify from "fastify";
 import { chatRoutes } from "./routes/chat.js";

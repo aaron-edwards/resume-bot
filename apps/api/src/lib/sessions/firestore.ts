@@ -1,6 +1,6 @@
-import { initializeApp } from "firebase-admin/app";
-import { FieldValue, getFirestore, type Firestore } from "firebase-admin/firestore";
 import type { ChatMessage } from "@repo/types";
+import { initializeApp } from "firebase-admin/app";
+import { FieldValue, type Firestore, getFirestore } from "firebase-admin/firestore";
 import type { SessionStore } from "./types.js";
 
 let db: Firestore | null = null;

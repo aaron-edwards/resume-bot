@@ -105,7 +105,9 @@ describe("POST /session/reset", () => {
 describe("POST /chat", () => {
   it("streams chunks as SSE events and ends with [DONE]", async () => {
     mockResolved(["Hello", " world"]);
-    vi.mocked(sessionStore.getSession).mockResolvedValue([{ role: "user" as const, content: "prev" }]);
+    vi.mocked(sessionStore.getSession).mockResolvedValue([
+      { role: "user" as const, content: "prev" },
+    ]);
 
     const app = buildApp();
     const response = await app.inject({

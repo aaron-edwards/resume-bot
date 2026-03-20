@@ -7,7 +7,14 @@ type RobotIconProps = {
 
 export function RobotIcon({ color = DEFAULT_COLOR, size = 32 }: RobotIconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
       <rect x="6" y="10" width="20" height="16" rx="3" fill={color} />
       <circle cx="11.5" cy="17" r="2.5" fill="white" />
       <circle cx="20.5" cy="17" r="2.5" fill="white" />

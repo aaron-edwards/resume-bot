@@ -1,5 +1,5 @@
-import type { FastifyInstance } from "fastify";
 import type { ChatMessage, ChatRequest } from "@repo/types";
+import type { FastifyInstance } from "fastify";
 import { streamChat } from "../lib/gemini.js";
 import { sessionStore } from "../lib/sessions/index.js";
 
@@ -22,10 +22,13 @@ function cookieOptions(request: { hostname: string }) {
   };
 }
 
-function getIp(request: { headers: Record<string, string | string[] | undefined>; ip: string }): string {
-  return (request.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim()
-    ?? request.ip
-    ?? "unknown";
+function getIp(request: {
+  headers: Record<string, string | string[] | undefined>;
+  ip: string;
+}): string {
+  return (
+    (request.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ?? request.ip ?? "unknown"
+  );
 }
 
 async function getOrCreateSession(
@@ -109,10 +112,12 @@ export async function chatRoutes(app: FastifyInstance) {
         reply.raw.write("data: [DONE]\n\n");
 
         if (sessionId) {
-          await sessionStore.saveSession(sessionId, ip, [
-            ...messages,
-            { role: "assistant", content: assistantResponse },
-          ]).catch((err) => app.log.error({ err }, "Failed to save session"));
+          await sessionStore
+            .saveSession(sessionId, ip, [
+              ...messages,
+              { role: "assistant", content: assistantResponse },
+            ])
+            .catch((err) => app.log.error({ err }, "Failed to save session"));
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
