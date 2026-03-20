@@ -40,26 +40,25 @@ export function deferredStream(chunks: string[]) {
 export function mockChatResponse(chunks: string[]) {
   const { stream, flush } = deferredStream(chunks);
   server.use(
-    http.post("http://localhost:3001/chat", () =>
-      new HttpResponse(stream, { headers: { "Content-Type": "text/event-stream" } })
+    http.post(
+      "http://localhost:3001/chat",
+      () => new HttpResponse(stream, { headers: { "Content-Type": "text/event-stream" } })
     )
   );
   return flush;
 }
 
 export const handlers = [
-  http.get("http://localhost:3001/session", () =>
-    HttpResponse.json({ messages: GREETING })
-  ),
+  http.get("http://localhost:3001/session", () => HttpResponse.json({ messages: GREETING })),
 
-  http.post("http://localhost:3001/session/reset", () =>
-    HttpResponse.json({ messages: GREETING })
-  ),
+  http.post("http://localhost:3001/session/reset", () => HttpResponse.json({ messages: GREETING })),
 
-  http.post("http://localhost:3001/chat", () =>
-    new HttpResponse(sseStream(["Hello", " world"]), {
-      headers: { "Content-Type": "text/event-stream" },
-    })
+  http.post(
+    "http://localhost:3001/chat",
+    () =>
+      new HttpResponse(sseStream(["Hello", " world"]), {
+        headers: { "Content-Type": "text/event-stream" },
+      })
   ),
 ];
 
