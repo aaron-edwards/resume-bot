@@ -64,6 +64,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Build frontend
+        env:
+          VITE_API_URL: https://resume-bot-api-2nhwokkrna-ts.a.run.app
         run: pnpm --filter web build
 
       - name: Deploy frontend to Firebase Hosting
