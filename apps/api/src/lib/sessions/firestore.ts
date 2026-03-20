@@ -16,10 +16,14 @@ function getDb(): Firestore {
 export const firestoreSessionStore: SessionStore = {
   async getSession(sessionId) {
     const doc = await getDb().collection("sessions").doc(sessionId).get();
-    return (doc.data()?.messages as ChatMessage[]) ?? [];
+    const data = doc.data();
+    return {
+      messages: (data?.messages as ChatMessage[]) ?? [],
+      userName: data?.userName as string | undefined,
+    };
   },
 
-  async saveSession(sessionId, ipAddress, messages: ChatMessage[]) {
+  async saveSession(sessionId, ipAddress, messages: ChatMessage[], userName?: string) {
     const ref = getDb().collection("sessions").doc(sessionId);
     const doc = await ref.get();
 
@@ -29,12 +33,14 @@ export const firestoreSessionStore: SessionStore = {
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
         messages,
+        ...(userName !== undefined && { userName }),
       });
     } else {
       await ref.update({
         ipAddress,
         updatedAt: FieldValue.serverTimestamp(),
         messages,
+        ...(userName !== undefined && { userName }),
       });
     }
   },

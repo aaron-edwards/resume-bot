@@ -1,8 +1,8 @@
 import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
-import rateLimit from "@fastify/rate-limit";
 import Fastify from "fastify";
 import { chatRoutes } from "./routes/chat.js";
+import { sessionRoutes } from "./routes/session.js";
 
 export function buildApp() {
   const app = Fastify({
@@ -16,15 +16,11 @@ export function buildApp() {
 
   app.register(cookie);
 
-  app.register(rateLimit, {
-    max: 5,
-    timeWindow: "1 minute",
-  });
-
   app.get("/health", async () => {
     return { status: "ok" };
   });
 
+  app.register(sessionRoutes);
   app.register(chatRoutes);
 
   return app;

@@ -68,6 +68,21 @@ describe("streamChat", () => {
     );
   });
 
+  it("limits messages to the last 50", async () => {
+    mockGenerateContentStream.mockResolvedValue(fakeStream([]));
+
+    const messages = Array.from({ length: 52 }, (_, i) => ({
+      role: i % 2 === 0 ? ("user" as const) : ("assistant" as const),
+      content: `message ${i}`,
+    }));
+
+    await collect(streamChat(messages));
+
+    const { contents } = mockGenerateContentStream.mock.calls[0]?.[0];
+    expect(contents).toHaveLength(50);
+    expect(contents[0]).toEqual({ role: "user", parts: [{ text: "message 2" }] });
+  });
+
   it("includes the system instruction", async () => {
     mockGenerateContentStream.mockResolvedValue(fakeStream([]));
 
