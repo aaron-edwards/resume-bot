@@ -78,7 +78,7 @@ describe("streamChat", () => {
 
     await collect(streamChat(messages));
 
-    const { contents } = mockGenerateContentStream.mock.calls[0]?.[0];
+    const { contents } = mockGenerateContentStream.mock.calls[0][0];
     expect(contents).toHaveLength(50);
     expect(contents[0]).toEqual({ role: "user", parts: [{ text: "message 2" }] });
   });
