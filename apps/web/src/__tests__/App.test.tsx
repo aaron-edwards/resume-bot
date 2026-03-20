@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createElement } from "react";
 import { http, HttpResponse } from "msw";
@@ -14,14 +14,6 @@ function wrapper({ children }: { children: React.ReactNode }) {
 function renderApp() {
   return render(<App />, { wrapper });
 }
-
-beforeEach(() => {
-  vi.stubGlobal("confirm", vi.fn().mockReturnValue(true));
-});
-
-afterEach(() => {
-  vi.unstubAllGlobals();
-});
 
 it("happy path: start session → reply → streaming → reset → greeting", async () => {
   const flush = mockChatResponse(["I'm", " Aaron's", " bot!"]);
@@ -43,8 +35,9 @@ it("happy path: start session → reply → streaming → reset → greeting", a
   flush();
   await screen.findByText("I'm Aaron's bot!");
 
-  // Reset back to greeting
+  // Reset back to greeting — open dialog then confirm
   await userEvent.click(screen.getByRole("button", { name: /reset/i }));
+  await userEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: /reset/i }));
   await screen.findByText(GREETING[0].content);
   expect(screen.queryByText("Who are you?")).not.toBeInTheDocument();
 });
@@ -67,8 +60,9 @@ it("error path: send message → see error → reset clears it", async () => {
   await screen.findByText(/something went wrong/i);
   expect(screen.queryByRole("status")).not.toBeInTheDocument();
 
-  // Reset clears the error and restores the greeting
+  // Reset clears the error and restores the greeting — open dialog then confirm
   await userEvent.click(screen.getByRole("button", { name: /reset/i }));
+  await userEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: /reset/i }));
   await screen.findByText(GREETING[0].content);
   expect(screen.queryByText(/something went wrong/i)).not.toBeInTheDocument();
 });

@@ -1,4 +1,5 @@
-import { FileDown, RotateCcw } from "lucide-react";
+import { FileDown } from "lucide-react";
+import { ResetDialog } from "./ResetDialog";
 import { GitHubIcon, LinkedInIcon } from "./icons/BrandIcons";
 import { RobotIcon } from "./icons/RobotIcon";
 
@@ -39,33 +40,7 @@ function NavLink({ href, label, download, className, children }: NavLinkProps) {
   );
 }
 
-type NavButtonProps = {
-  label: string;
-  onClick: () => void;
-  className?: string;
-  children: React.ReactNode;
-};
-
-function NavButton({ label, className, onClick, children }: NavButtonProps) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      onClick={onClick}
-      className={`text-muted-foreground transition-colors cursor-pointer ${className ?? ""}`}
-    >
-      <NavItemContent label={label}>{children}</NavItemContent>
-    </button>
-  );
-}
-
 export function Header({ title, onReset }: HeaderProps) {
-  const handleReset = () => {
-    if (window.confirm("Start a new conversation? This will clear your current chat history.")) {
-      onReset();
-    }
-  };
-
   return (
     <header className="border-b px-4 py-3 flex items-center gap-3">
       <RobotIcon />
@@ -88,9 +63,7 @@ export function Header({ title, onReset }: HeaderProps) {
         >
           <GitHubIcon className="h-5 w-5" />
         </NavLink>
-        <NavButton label="Reset" className="hover:text-orange-500" onClick={handleReset}>
-          <RotateCcw className="h-5 w-5" />
-        </NavButton>
+        <ResetDialog onReset={onReset} />
       </nav>
     </header>
   );

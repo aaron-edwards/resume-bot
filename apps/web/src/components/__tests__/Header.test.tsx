@@ -1,14 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Header } from "../Header";
-
-beforeEach(() => {
-  vi.spyOn(window, "confirm").mockReturnValue(true);
-});
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
 
 describe("Header", () => {
   it("renders the title", () => {
@@ -16,22 +8,23 @@ describe("Header", () => {
     expect(screen.getByRole("heading")).toHaveTextContent("Aaron's ResumeBot");
   });
 
-  it("calls onReset when reset is confirmed", async () => {
+  it("calls onReset when reset is confirmed in the dialog", async () => {
     const onReset = vi.fn();
     render(<Header title="Aaron's ResumeBot" onReset={onReset} />);
 
     await userEvent.click(screen.getByRole("button", { name: /reset/i }));
+    const dialog = screen.getByRole("alertdialog");
+    await userEvent.click(within(dialog).getByRole("button", { name: /reset/i }));
 
-    expect(window.confirm).toHaveBeenCalled();
     expect(onReset).toHaveBeenCalledTimes(1);
   });
 
-  it("does not call onReset when reset is cancelled", async () => {
-    vi.spyOn(window, "confirm").mockReturnValue(false);
+  it("does not call onReset when cancel is clicked", async () => {
     const onReset = vi.fn();
     render(<Header title="Aaron's ResumeBot" onReset={onReset} />);
 
     await userEvent.click(screen.getByRole("button", { name: /reset/i }));
+    await userEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
     expect(onReset).not.toHaveBeenCalled();
   });

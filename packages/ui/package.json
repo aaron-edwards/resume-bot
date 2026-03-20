@@ -3,12 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
+    "./alert-dialog": "./src/components/ui/alert-dialog.tsx",
     "./button": "./src/components/ui/button.tsx",
     "./textarea": "./src/components/ui/textarea.tsx",
     "./utils": "./src/lib/utils.ts"
   },
   "dependencies": {
-    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-alert-dialog": "^1.1.15",
+    "@radix-ui/react-slot": "^1.2.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.511.0",
