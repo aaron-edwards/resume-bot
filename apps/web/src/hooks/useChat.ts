@@ -35,7 +35,11 @@ export function useChat(): UseChatResponse {
   const sendMessage = async (message: string) => {
     if (!message.trim() || isStreaming || isLoading) return;
 
-    setMessages((prev) => [...prev, { role: "user", content: message }, { role: "assistant", content: "" }]);
+    setMessages((prev) => [
+      ...prev,
+      { role: "user", content: message },
+      { role: "assistant", content: "" },
+    ]);
     setIsStreaming(true);
     setError(null);
 

@@ -1,10 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { createElement } from "react";
 import { http, HttpResponse } from "msw";
-import { GREETING, mockChatResponse, server } from "../test/server";
+import { createElement } from "react";
 import App from "../App";
+import { GREETING, mockChatResponse, server } from "../test/server";
 
 function wrapper({ children }: { children: React.ReactNode }) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -37,16 +37,16 @@ it("happy path: start session → reply → streaming → reset → greeting", a
 
   // Reset back to greeting — open dialog then confirm
   await userEvent.click(screen.getByRole("button", { name: /reset/i }));
-  await userEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: /reset/i }));
+  await userEvent.click(
+    within(screen.getByRole("alertdialog")).getByRole("button", { name: /reset/i })
+  );
   await screen.findByText(GREETING[0].content);
   expect(screen.queryByText("Who are you?")).not.toBeInTheDocument();
 });
 
 it("error path: send message → see error → reset clears it", async () => {
   server.use(
-    http.post("http://localhost:3001/chat", () =>
-      new HttpResponse(null, { status: 500 })
-    )
+    http.post("http://localhost:3001/chat", () => new HttpResponse(null, { status: 500 }))
   );
 
   renderApp();
@@ -62,7 +62,9 @@ it("error path: send message → see error → reset clears it", async () => {
 
   // Reset clears the error and restores the greeting — open dialog then confirm
   await userEvent.click(screen.getByRole("button", { name: /reset/i }));
-  await userEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: /reset/i }));
+  await userEvent.click(
+    within(screen.getByRole("alertdialog")).getByRole("button", { name: /reset/i })
+  );
   await screen.findByText(GREETING[0].content);
   expect(screen.queryByText(/something went wrong/i)).not.toBeInTheDocument();
 });
