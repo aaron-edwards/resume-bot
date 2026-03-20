@@ -4,5 +4,6 @@ export type ChatMessage = {
 };
 
 export type ChatRequest = {
-  messages: ChatMessage[];
+  message: string;
+  sessionId?: string;
 };

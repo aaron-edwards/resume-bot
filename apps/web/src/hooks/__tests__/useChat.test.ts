@@ -21,8 +21,20 @@ function mockFetch(streamFactory: () => ReadableStream) {
   );
 }
 
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: (key: string) => store[key] ?? null,
+    setItem: (key: string, value: string) => { store[key] = value; },
+    removeItem: (key: string) => { delete store[key]; },
+    clear: () => { store = {}; },
+  };
+})();
+
 beforeEach(() => {
   vi.unstubAllGlobals();
+  vi.stubGlobal("localStorage", localStorageMock);
+  localStorageMock.clear();
 });
 
 describe("useChat", () => {

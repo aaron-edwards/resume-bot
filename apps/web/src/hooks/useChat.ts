@@ -16,6 +16,15 @@ const INITIAL_MESSAGE: ChatMessage = {
   content: "Hi! I'm Aaron's ResumeBot. What would you like to know about Aaron?",
 };
 
+function getSessionId(): string {
+  const key = "resumebot-session-id";
+  const existing = localStorage.getItem(key);
+  if (existing) return existing;
+  const id = crypto.randomUUID();
+  localStorage.setItem(key, id);
+  return id;
+}
+
 export function useChat(): UseChatResponse {
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -23,6 +32,8 @@ export function useChat(): UseChatResponse {
 
   const sendMessage = async (message: string) => {
     if (!message.trim() || isStreaming) return;
+
+    const sessionId = getSessionId();
 
     const next: ChatMessage[] = [
       ...messages,
@@ -35,7 +46,7 @@ export function useChat(): UseChatResponse {
     setError(null);
 
     try {
-      for await (const text of streamChatResponse(next.slice(0, -1))) {
+      for await (const text of streamChatResponse(message, sessionId)) {
         setMessages((prev) => {
           const updated = [...prev];
           const last = updated[updated.length - 1];

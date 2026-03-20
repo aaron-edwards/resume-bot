@@ -30,12 +30,26 @@ async function collect(gen: AsyncGenerator<string>): Promise<string[]> {
 }
 
 describe("streamChatResponse", () => {
+  it("sends message and sessionId in the request body", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue({ ok: true, body: createSseStream(["[DONE]"]) });
+    vi.stubGlobal("fetch", fetchSpy);
+
+    await collect(streamChatResponse("Hello", "session-1"));
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining("/chat"),
+      expect.objectContaining({
+        body: JSON.stringify({ message: "Hello", sessionId: "session-1" }),
+      })
+    );
+  });
+
   it("yields text from each chunk", async () => {
     mockFetch(
       createSseStream([JSON.stringify({ text: "Hello" }), JSON.stringify({ text: " world" })])
     );
 
-    const chunks = await collect(streamChatResponse([{ role: "user", content: "Hi" }]));
+    const chunks = await collect(streamChatResponse("Hi", "session-1"));
     expect(chunks).toEqual(["Hello", " world"]);
   });
 
@@ -44,7 +58,7 @@ describe("streamChatResponse", () => {
       createSseStream([JSON.stringify({ text: "Hello" }), "[DONE]", JSON.stringify({ text: "ignored" })])
     );
 
-    const chunks = await collect(streamChatResponse([{ role: "user", content: "Hi" }]));
+    const chunks = await collect(streamChatResponse("Hi", "session-1"));
     expect(chunks).toEqual(["Hello"]);
   });
 
@@ -58,14 +72,14 @@ describe("streamChatResponse", () => {
     });
     mockFetch(stream);
 
-    const chunks = await collect(streamChatResponse([{ role: "user", content: "Hi" }]));
+    const chunks = await collect(streamChatResponse("Hi", "session-1"));
     expect(chunks).toEqual(["Hello"]);
   });
 
   it("throws when the stream contains an error event", async () => {
     mockFetch(createSseStream([JSON.stringify({ error: "something went wrong" })]));
 
-    await expect(collect(streamChatResponse([{ role: "user", content: "Hi" }]))).rejects.toThrow(
+    await expect(collect(streamChatResponse("Hi", "session-1"))).rejects.toThrow(
       "something went wrong"
     );
   });
@@ -73,7 +87,7 @@ describe("streamChatResponse", () => {
   it("yields nothing when stream is empty", async () => {
     mockFetch(createSseStream([]));
 
-    const chunks = await collect(streamChatResponse([{ role: "user", content: "Hi" }]));
+    const chunks = await collect(streamChatResponse("Hi", "session-1"));
     expect(chunks).toEqual([]);
   });
 });

@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import type { ChatRequest } from "@repo/types";
 import { streamChat } from "../lib/gemini.js";
+import { sessionStore } from "../lib/sessions/index.js";
 
 export async function chatRoutes(app: FastifyInstance) {
   app.post<{ Body: ChatRequest }>(
@@ -9,29 +10,19 @@ export async function chatRoutes(app: FastifyInstance) {
       schema: {
         body: {
           type: "object",
-          required: ["messages"],
+          required: ["message"],
           properties: {
-            messages: {
-              type: "array",
-              minItems: 1,
-              items: {
-                type: "object",
-                required: ["role", "content"],
-                properties: {
-                  role: { type: "string", enum: ["user", "assistant"] },
-                  content: { type: "string", minLength: 1 },
-                },
-                if: { properties: { role: { const: "user" } } },
-                // biome-ignore lint/suspicious/noThenProperty: `then` is part of the fastify schema validation
-                then: { properties: { content: { type: "string", maxLength: 1000 } } },
-              },
-            },
+            message: { type: "string", minLength: 1, maxLength: 1000 },
+            sessionId: { type: "string" },
           },
         },
       },
     },
     async (request, reply) => {
-      const { messages } = request.body;
+      const { message, sessionId } = request.body;
+      const ip = (request.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim()
+        ?? request.ip
+        ?? "unknown";
 
       reply.raw.setHeader("Content-Type", "text/event-stream");
       reply.raw.setHeader("Cache-Control", "no-cache");
@@ -42,12 +33,29 @@ export async function chatRoutes(app: FastifyInstance) {
       );
       reply.raw.flushHeaders();
 
+      app.log.info({ sessionId, ip, message }, "chat request");
+
+      const history = sessionId ? await sessionStore.getSession(sessionId) : [];
+      const messages = [...history.slice(-10), { role: "user" as const, content: message }];
+
+      let assistantResponse = "";
+
       try {
         for await (const text of streamChat(messages)) {
+          assistantResponse += text;
           reply.raw.write(`data: ${JSON.stringify({ text })}\n\n`);
         }
 
+        app.log.info({ sessionId, response: assistantResponse }, "chat response");
+
         reply.raw.write("data: [DONE]\n\n");
+
+        if (sessionId) {
+          await sessionStore.saveSession(sessionId, ip, [
+            ...messages,
+            { role: "assistant", content: assistantResponse },
+          ]).catch((err) => app.log.error({ err }, "Failed to save session"));
+        }
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         app.log.error(err);
