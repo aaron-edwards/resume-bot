@@ -30,28 +30,18 @@ jobs:
 
       - run: pnpm build
 
-  deploy:
+  deploy-api:
     needs: ci
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
 
     env:
-      GCP_PROJECT: gen-lang-client-0097374271
       GCP_REGION: australia-southeast1
       IMAGE: australia-southeast1-docker.pkg.dev/gen-lang-client-0097374271/resume-bot/api
       CLOUD_RUN_SERVICE: resume-bot-api
 
     steps:
       - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'pnpm'
-
-      - run: pnpm install --frozen-lockfile
 
       - name: Authenticate with GCP
         uses: google-github-actions/auth@v2
@@ -77,6 +67,26 @@ jobs:
             --platform managed \
             --allow-unauthenticated \
             --set-env-vars GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }},CORS_ORIGIN=https://aaron-edwards-resumebot.web.app
+
+  deploy-web:
+    needs: ci
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/add-cd')
+    runs-on: ubuntu-latest
+
+    env:
+      GCP_PROJECT: gen-lang-client-0097374271
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
 
       - name: Build frontend
         run: pnpm --filter web build
