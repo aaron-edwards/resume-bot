@@ -21,22 +21,21 @@ function buildSystemPrompt(userName?: string) {
     : CHAT_SYSTEM_PROMPT;
 }
 
-export function makeStreamChat(client: GoogleGenAI) {
-  return async function* streamChat(
-    messages: ChatMessage[],
-    userName?: string
-  ): AsyncGenerator<string> {
-    const stream = await client.models.generateContentStream({
-      model: "gemini-2.5-flash",
-      config: { systemInstruction: buildSystemPrompt(userName) },
-      contents: messages.slice(-MAX_HISTORY_MESSAGES).map((m) => ({
-        role: m.role === "assistant" ? "model" : "user",
-        parts: [{ text: m.content }],
-      })),
-    });
+export async function* streamChat(
+  genAiClient: GoogleGenAI,
+  messages: ChatMessage[],
+  userName?: string
+): AsyncGenerator<string> {
+  const stream = await genAiClient.models.generateContentStream({
+    model: "gemini-2.5-flash",
+    config: { systemInstruction: buildSystemPrompt(userName) },
+    contents: messages.slice(-MAX_HISTORY_MESSAGES).map((m) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    })),
+  });
 
-    for await (const chunk of stream) {
-      if (chunk.text) yield chunk.text;
-    }
-  };
+  for await (const chunk of stream) {
+    if (chunk.text) yield chunk.text;
+  }
 }

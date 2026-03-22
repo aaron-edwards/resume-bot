@@ -1,14 +1,20 @@
+import type { FastifyInstance } from "fastify";
 import { vi } from "vitest";
 import { buildApp } from "../../app.js";
-import { llm } from "../../lib/llm/index.js";
 import { sessionStore } from "../../lib/sessions/index.js";
 
-vi.mock("../../lib/llm/index.js", () => ({
-  llm: {
-    streamChat: vi.fn(),
-    extractName: vi.fn().mockResolvedValue(undefined),
-  },
-}));
+vi.mock("../../plugins/llm/index.js", async () => {
+  const fp = (await import("fastify-plugin")).default;
+  return {
+    // biome-ignore lint/suspicious/noExplicitAny: fastify.llm is decorated by this plugin, not yet typed here
+    default: fp(async (fastify: any) => {
+      fastify.decorate("llm", {
+        streamChat: vi.fn(),
+        extractName: vi.fn().mockResolvedValue(undefined),
+      });
+    }),
+  };
+});
 
 vi.mock("../../lib/sessions/index.js", () => ({
   sessionStore: {
@@ -23,9 +29,6 @@ async function* mockStream(chunks: string[]) {
   }
 }
 
-const mockResolved = (chunks: string[]) =>
-  vi.mocked(llm.streamChat).mockReturnValue(mockStream(chunks));
-
 function parseSseEvents(body: string) {
   return body
     .split("\n\n")
@@ -35,19 +38,22 @@ function parseSseEvents(body: string) {
 
 const SESSION_COOKIE = "session-id=test-session";
 
-beforeEach(() => {
-  vi.clearAllMocks();
-});
-
 describe("POST /chat", () => {
+  let app: FastifyInstance;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    app = buildApp();
+    await app.ready();
+  });
+
   it("streams chunks as SSE events and ends with [DONE]", async () => {
-    mockResolved(["Hello", " world"]);
+    vi.mocked(app.llm.streamChat).mockReturnValue(mockStream(["Hello", " world"]));
     vi.mocked(sessionStore.getSession).mockResolvedValue({
       messages: [{ role: "user" as const, content: "prev" }],
       userName: undefined,
     });
 
-    const app = buildApp();
     const response = await app.inject({
       method: "POST",
       url: "/chat",
@@ -62,7 +68,7 @@ describe("POST /chat", () => {
   });
 
   it("appends message to history loaded from session store", async () => {
-    mockResolved([]);
+    vi.mocked(app.llm.streamChat).mockReturnValue(mockStream([]));
     vi.mocked(sessionStore.getSession).mockResolvedValue({
       messages: [
         { role: "user" as const, content: "Hello" },
@@ -71,7 +77,6 @@ describe("POST /chat", () => {
       userName: undefined,
     });
 
-    const app = buildApp();
     await app.inject({
       method: "POST",
       url: "/chat",
@@ -79,7 +84,7 @@ describe("POST /chat", () => {
       payload: { message: "How are you?" },
     });
 
-    expect(vi.mocked(llm.streamChat)).toHaveBeenCalledWith(
+    expect(vi.mocked(app.llm.streamChat)).toHaveBeenCalledWith(
       [
         { role: "user", content: "Hello" },
         { role: "assistant", content: "Hi there!" },
@@ -90,7 +95,7 @@ describe("POST /chat", () => {
   });
 
   it("passes full history plus new message to streamChat", async () => {
-    mockResolved([]);
+    vi.mocked(app.llm.streamChat).mockReturnValue(mockStream([]));
     const history = Array.from({ length: 4 }, (_, i) => ({
       role: i % 2 === 0 ? ("user" as const) : ("assistant" as const),
       content: `message ${i}`,
@@ -100,7 +105,6 @@ describe("POST /chat", () => {
       userName: undefined,
     });
 
-    const app = buildApp();
     await app.inject({
       method: "POST",
       url: "/chat",
@@ -108,13 +112,13 @@ describe("POST /chat", () => {
       payload: { message: "new message" },
     });
 
-    const calledWith = vi.mocked(llm.streamChat).mock.calls[0]?.[0];
+    const calledWith = vi.mocked(app.llm.streamChat).mock.calls[0]?.[0];
     expect(calledWith).toHaveLength(5);
     expect(calledWith?.[4]).toEqual({ role: "user", content: "new message" });
   });
 
   it("saves the full conversation after streaming completes", async () => {
-    mockResolved(["Hello", " world"]);
+    vi.mocked(app.llm.streamChat).mockReturnValue(mockStream(["Hello", " world"]));
     vi.mocked(sessionStore.getSession).mockResolvedValue({
       messages: [
         { role: "user" as const, content: "previous" },
@@ -123,7 +127,6 @@ describe("POST /chat", () => {
       userName: undefined,
     });
 
-    const app = buildApp();
     await app.inject({
       method: "POST",
       url: "/chat",
@@ -145,7 +148,6 @@ describe("POST /chat", () => {
   });
 
   it("returns 400 when no session cookie is present", async () => {
-    const app = buildApp();
     const response = await app.inject({
       method: "POST",
       url: "/chat",
@@ -158,13 +160,12 @@ describe("POST /chat", () => {
 
   describe("name extraction", () => {
     it("calls extractName on the first user message", async () => {
-      mockResolved([]);
+      vi.mocked(app.llm.streamChat).mockReturnValue(mockStream([]));
       vi.mocked(sessionStore.getSession).mockResolvedValue({
         messages: [{ role: "assistant" as const, content: "Hi!" }],
         userName: undefined,
       });
 
-      const app = buildApp();
       await app.inject({
         method: "POST",
         url: "/chat",
@@ -172,21 +173,20 @@ describe("POST /chat", () => {
         payload: { message: "I'm Alex" },
       });
 
-      expect(vi.mocked(llm.extractName)).toHaveBeenCalledWith([
+      expect(vi.mocked(app.llm.extractName)).toHaveBeenCalledWith([
         { role: "assistant", content: "Hi!" },
         { role: "user", content: "I'm Alex" },
       ]);
     });
 
     it("saves userName and passes it to streamChat when a name is found", async () => {
-      mockResolved(["Hi Alex!"]);
+      vi.mocked(app.llm.streamChat).mockReturnValue(mockStream(["Hi Alex!"]));
       vi.mocked(sessionStore.getSession).mockResolvedValue({
         messages: [{ role: "assistant" as const, content: "Hi!" }],
         userName: undefined,
       });
-      vi.mocked(llm.extractName).mockResolvedValue("Alex");
+      vi.mocked(app.llm.extractName).mockResolvedValue("Alex");
 
-      const app = buildApp();
       await app.inject({
         method: "POST",
         url: "/chat",
@@ -203,11 +203,11 @@ describe("POST /chat", () => {
         ],
         "Alex"
       );
-      expect(vi.mocked(llm.streamChat)).toHaveBeenCalledWith(expect.any(Array), "Alex");
+      expect(vi.mocked(app.llm.streamChat)).toHaveBeenCalledWith(expect.any(Array), "Alex");
     });
 
     it("does not call extractName on subsequent messages", async () => {
-      mockResolved([]);
+      vi.mocked(app.llm.streamChat).mockReturnValue(mockStream([]));
       vi.mocked(sessionStore.getSession).mockResolvedValue({
         messages: [
           { role: "assistant" as const, content: "Hi!" },
@@ -216,7 +216,6 @@ describe("POST /chat", () => {
         userName: "Alex",
       });
 
-      const app = buildApp();
       await app.inject({
         method: "POST",
         url: "/chat",
@@ -224,11 +223,11 @@ describe("POST /chat", () => {
         payload: { message: "Tell me about Aaron" },
       });
 
-      expect(vi.mocked(llm.extractName)).not.toHaveBeenCalled();
+      expect(vi.mocked(app.llm.extractName)).not.toHaveBeenCalled();
     });
 
     it("passes existing userName to streamChat on subsequent messages", async () => {
-      mockResolved([]);
+      vi.mocked(app.llm.streamChat).mockReturnValue(mockStream([]));
       vi.mocked(sessionStore.getSession).mockResolvedValue({
         messages: [
           { role: "assistant" as const, content: "Hi!" },
@@ -237,7 +236,6 @@ describe("POST /chat", () => {
         userName: "Alex",
       });
 
-      const app = buildApp();
       await app.inject({
         method: "POST",
         url: "/chat",
@@ -245,18 +243,17 @@ describe("POST /chat", () => {
         payload: { message: "Tell me about Aaron" },
       });
 
-      expect(vi.mocked(llm.streamChat)).toHaveBeenCalledWith(expect.any(Array), "Alex");
+      expect(vi.mocked(app.llm.streamChat)).toHaveBeenCalledWith(expect.any(Array), "Alex");
     });
 
     it("skips saving userName when no name is found", async () => {
-      mockResolved([]);
+      vi.mocked(app.llm.streamChat).mockReturnValue(mockStream([]));
       vi.mocked(sessionStore.getSession).mockResolvedValue({
         messages: [{ role: "assistant" as const, content: "Hi!" }],
         userName: undefined,
       });
-      vi.mocked(llm.extractName).mockResolvedValue(undefined);
+      vi.mocked(app.llm.extractName).mockResolvedValue(undefined);
 
-      const app = buildApp();
       await app.inject({
         method: "POST",
         url: "/chat",
@@ -273,11 +270,10 @@ describe("POST /chat", () => {
   describe("errors", () => {
     it("sends error event when stream fails", async () => {
       // biome-ignore lint/correctness/useYield: generator throws before reaching any yield
-      vi.mocked(llm.streamChat).mockImplementation(async function* () {
+      vi.mocked(app.llm.streamChat).mockImplementation(async function* () {
         throw new Error("API unavailable");
       });
 
-      const app = buildApp();
       const response = await app.inject({
         method: "POST",
         url: "/chat",
@@ -290,7 +286,6 @@ describe("POST /chat", () => {
     });
 
     it("returns 400 for missing message", async () => {
-      const app = buildApp();
       const response = await app.inject({
         method: "POST",
         url: "/chat",
@@ -300,7 +295,6 @@ describe("POST /chat", () => {
     });
 
     it("returns 400 when message exceeds 1000 characters", async () => {
-      const app = buildApp();
       const response = await app.inject({
         method: "POST",
         url: "/chat",
