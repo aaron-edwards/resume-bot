@@ -1,11 +1,13 @@
 import { vi } from "vitest";
 import { buildApp } from "../../app.js";
-import { extractName, streamChat } from "../../lib/gemini.js";
+import { llm } from "../../lib/llm/index.js";
 import { sessionStore } from "../../lib/sessions/index.js";
 
-vi.mock("../../lib/gemini.js", () => ({
-  streamChat: vi.fn(),
-  extractName: vi.fn().mockResolvedValue({ found: false }),
+vi.mock("../../lib/llm/index.js", () => ({
+  llm: {
+    streamChat: vi.fn(),
+    extractName: vi.fn().mockResolvedValue({ found: false }),
+  },
 }));
 
 vi.mock("../../lib/sessions/index.js", () => ({
@@ -22,7 +24,7 @@ async function* mockStream(chunks: string[]) {
 }
 
 const mockResolved = (chunks: string[]) =>
-  vi.mocked(streamChat).mockReturnValue(mockStream(chunks));
+  vi.mocked(llm.streamChat).mockReturnValue(mockStream(chunks));
 
 function parseSseEvents(body: string) {
   return body
@@ -77,7 +79,7 @@ describe("POST /chat", () => {
       payload: { message: "How are you?" },
     });
 
-    expect(vi.mocked(streamChat)).toHaveBeenCalledWith(
+    expect(vi.mocked(llm.streamChat)).toHaveBeenCalledWith(
       [
         { role: "user", content: "Hello" },
         { role: "assistant", content: "Hi there!" },
@@ -106,7 +108,7 @@ describe("POST /chat", () => {
       payload: { message: "new message" },
     });
 
-    const calledWith = vi.mocked(streamChat).mock.calls[0]?.[0];
+    const calledWith = vi.mocked(llm.streamChat).mock.calls[0]?.[0];
     expect(calledWith).toHaveLength(5);
     expect(calledWith?.[4]).toEqual({ role: "user", content: "new message" });
   });
@@ -170,7 +172,7 @@ describe("POST /chat", () => {
         payload: { message: "I'm Alex" },
       });
 
-      expect(vi.mocked(extractName)).toHaveBeenCalledWith([
+      expect(vi.mocked(llm.extractName)).toHaveBeenCalledWith([
         { role: "assistant", content: "Hi!" },
         { role: "user", content: "I'm Alex" },
       ]);
@@ -182,7 +184,7 @@ describe("POST /chat", () => {
         messages: [{ role: "assistant" as const, content: "Hi!" }],
         userName: undefined,
       });
-      vi.mocked(extractName).mockResolvedValue({ found: true, name: "Alex" });
+      vi.mocked(llm.extractName).mockResolvedValue({ found: true, name: "Alex" });
 
       const app = buildApp();
       await app.inject({
@@ -201,7 +203,7 @@ describe("POST /chat", () => {
         ],
         "Alex"
       );
-      expect(vi.mocked(streamChat)).toHaveBeenCalledWith(expect.any(Array), "Alex");
+      expect(vi.mocked(llm.streamChat)).toHaveBeenCalledWith(expect.any(Array), "Alex");
     });
 
     it("does not call extractName on subsequent messages", async () => {
@@ -222,7 +224,7 @@ describe("POST /chat", () => {
         payload: { message: "Tell me about Aaron" },
       });
 
-      expect(vi.mocked(extractName)).not.toHaveBeenCalled();
+      expect(vi.mocked(llm.extractName)).not.toHaveBeenCalled();
     });
 
     it("passes existing userName to streamChat on subsequent messages", async () => {
@@ -243,7 +245,7 @@ describe("POST /chat", () => {
         payload: { message: "Tell me about Aaron" },
       });
 
-      expect(vi.mocked(streamChat)).toHaveBeenCalledWith(expect.any(Array), "Alex");
+      expect(vi.mocked(llm.streamChat)).toHaveBeenCalledWith(expect.any(Array), "Alex");
     });
 
     it("skips saving userName when no name is found", async () => {
@@ -252,7 +254,7 @@ describe("POST /chat", () => {
         messages: [{ role: "assistant" as const, content: "Hi!" }],
         userName: undefined,
       });
-      vi.mocked(extractName).mockResolvedValue({ found: false });
+      vi.mocked(llm.extractName).mockResolvedValue({ found: false });
 
       const app = buildApp();
       await app.inject({
@@ -271,7 +273,7 @@ describe("POST /chat", () => {
   describe("errors", () => {
     it("sends error event when stream fails", async () => {
       // biome-ignore lint/correctness/useYield: generator throws before reaching any yield
-      vi.mocked(streamChat).mockImplementation(async function* () {
+      vi.mocked(llm.streamChat).mockImplementation(async function* () {
         throw new Error("API unavailable");
       });
 

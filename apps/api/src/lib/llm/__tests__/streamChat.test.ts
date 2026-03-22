@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { streamChat } from "../gemini.js";
+import { llm } from "../index.js";
 
 const mockGenerateContentStream = vi.hoisted(() => vi.fn());
 
@@ -33,7 +33,7 @@ describe("streamChat", () => {
       fakeStream([{ text: "Hello" }, { text: " world" }])
     );
 
-    const chunks = await collect(streamChat([{ role: "user", content: "Hi" }]));
+    const chunks = await collect(llm.streamChat([{ role: "user", content: "Hi" }]));
     expect(chunks).toEqual(["Hello", " world"]);
   });
 
@@ -42,7 +42,7 @@ describe("streamChat", () => {
       fakeStream([{ text: "Hello" }, {}, { text: "world" }])
     );
 
-    const chunks = await collect(streamChat([{ role: "user", content: "Hi" }]));
+    const chunks = await collect(llm.streamChat([{ role: "user", content: "Hi" }]));
     expect(chunks).toEqual(["Hello", "world"]);
   });
 
@@ -50,7 +50,7 @@ describe("streamChat", () => {
     mockGenerateContentStream.mockResolvedValue(fakeStream([]));
 
     await collect(
-      streamChat([
+      llm.streamChat([
         { role: "user", content: "Hello" },
         { role: "assistant", content: "Hi there" },
         { role: "user", content: "How are you?" },
@@ -76,7 +76,7 @@ describe("streamChat", () => {
       content: `message ${i}`,
     }));
 
-    await collect(streamChat(messages));
+    await collect(llm.streamChat(messages));
 
     // biome-ignore lint/style/noNonNullAssertion: mock is guaranteed to have been called
     const { contents } = mockGenerateContentStream.mock.calls[0]![0];
@@ -87,7 +87,7 @@ describe("streamChat", () => {
   it("includes the system instruction", async () => {
     mockGenerateContentStream.mockResolvedValue(fakeStream([]));
 
-    await collect(streamChat([{ role: "user", content: "Hi" }]));
+    await collect(llm.streamChat([{ role: "user", content: "Hi" }]));
 
     expect(mockGenerateContentStream).toHaveBeenCalledWith(
       expect.objectContaining({

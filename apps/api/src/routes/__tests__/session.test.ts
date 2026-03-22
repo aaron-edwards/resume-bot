@@ -2,9 +2,11 @@ import { vi } from "vitest";
 import { buildApp } from "../../app.js";
 import { sessionStore } from "../../lib/sessions/index.js";
 
-vi.mock("../../lib/gemini.js", () => ({
-  streamChat: vi.fn(),
-  extractName: vi.fn().mockResolvedValue({ found: false }),
+vi.mock("../../lib/llm/index.js", () => ({
+  llm: {
+    streamChat: vi.fn(),
+    extractName: vi.fn().mockResolvedValue({ found: false }),
+  },
 }));
 
 vi.mock("../../lib/sessions/index.js", () => ({

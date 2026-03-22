@@ -1,7 +1,7 @@
 import rateLimit from "@fastify/rate-limit";
 import type { ChatMessage, ChatRequest } from "@repo/types";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { extractName, streamChat } from "../lib/gemini.js";
+import { llm } from "../lib/llm/index.js";
 import { sessionStore } from "../lib/sessions/index.js";
 import { SESSION_COOKIE, getIp } from "./shared.js";
 
@@ -18,7 +18,7 @@ function startSseStream(reply: FastifyReply) {
 }
 
 async function resolveUserName(messages: ChatMessage[]): Promise<string | undefined> {
-  const result = await extractName(messages);
+  const result = await llm.extractName(messages);
   return result.found ? result.name : undefined;
 }
 
@@ -30,7 +30,7 @@ async function streamAndSave(
   let assistantResponse = "";
 
   try {
-    for await (const text of streamChat(session.messages, session.userName)) {
+    for await (const text of llm.streamChat(session.messages, session.userName)) {
       assistantResponse += text;
       reply.raw.write(`data: ${JSON.stringify({ text })}\n\n`);
     }
