@@ -6,7 +6,7 @@ import { sessionStore } from "../../lib/sessions/index.js";
 vi.mock("../../lib/llm/index.js", () => ({
   llm: {
     streamChat: vi.fn(),
-    extractName: vi.fn().mockResolvedValue({ found: false }),
+    extractName: vi.fn().mockResolvedValue(undefined),
   },
 }));
 
@@ -184,7 +184,7 @@ describe("POST /chat", () => {
         messages: [{ role: "assistant" as const, content: "Hi!" }],
         userName: undefined,
       });
-      vi.mocked(llm.extractName).mockResolvedValue({ found: true, name: "Alex" });
+      vi.mocked(llm.extractName).mockResolvedValue("Alex");
 
       const app = buildApp();
       await app.inject({
@@ -254,7 +254,7 @@ describe("POST /chat", () => {
         messages: [{ role: "assistant" as const, content: "Hi!" }],
         userName: undefined,
       });
-      vi.mocked(llm.extractName).mockResolvedValue({ found: false });
+      vi.mocked(llm.extractName).mockResolvedValue(undefined);
 
       const app = buildApp();
       await app.inject({

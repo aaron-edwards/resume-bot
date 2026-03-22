@@ -11,7 +11,7 @@ function buildContents(messages: ChatMessage[]) {
       role: "user",
       parts: [
         {
-          text: 'Did the user introduce themselves by name or alter-ego? Return JSON only: { "found": true, "name": "<name>" } or { "found": false }. If the user did not provide their own name, return { "found": false }.',
+          text: 'Did the user introduce themselves by name or alter-ego? Return JSON only: { "name": "<name>" } if they did, or {} if they did not.',
         },
       ],
     },
@@ -19,9 +19,7 @@ function buildContents(messages: ChatMessage[]) {
 }
 
 export function makeExtractName(client: GoogleGenAI) {
-  return async function extractName(
-    messages: ChatMessage[]
-  ): Promise<{ found: boolean; name?: string }> {
+  return async function extractName(messages: ChatMessage[]): Promise<string | undefined> {
     try {
       const response = await client.models.generateContent({
         model: "gemini-2.5-flash-lite",
@@ -33,10 +31,11 @@ export function makeExtractName(client: GoogleGenAI) {
       });
       const text = response.text ?? "";
       const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) return { found: false };
-      return JSON.parse(jsonMatch[0]) as { found: boolean; name?: string };
+      if (!jsonMatch) return undefined;
+      const parsed = JSON.parse(jsonMatch[0]) as { name?: string };
+      return parsed.name;
     } catch {
-      return { found: false };
+      return undefined;
     }
   };
 }

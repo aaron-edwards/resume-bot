@@ -14,36 +14,36 @@ beforeEach(() => {
 });
 
 describe("extractName", () => {
-  it("returns found name when model responds with one", async () => {
-    mockGenerateContent.mockResolvedValue({ text: '{"found":true,"name":"Alex"}' });
+  it("returns the name when model finds one", async () => {
+    mockGenerateContent.mockResolvedValue({ text: '{"name":"Alex"}' });
 
     const result = await llm.extractName([{ role: "user", content: "Hi, I'm Alex" }]);
-    expect(result).toEqual({ found: true, name: "Alex" });
+    expect(result).toBe("Alex");
   });
 
-  it("returns found false when model finds no name", async () => {
-    mockGenerateContent.mockResolvedValue({ text: '{"found":false}' });
+  it("returns undefined when model finds no name", async () => {
+    mockGenerateContent.mockResolvedValue({ text: "{}" });
 
     const result = await llm.extractName([{ role: "user", content: "Tell me about Aaron" }]);
-    expect(result).toEqual({ found: false });
+    expect(result).toBeUndefined();
   });
 
-  it("returns found false when model response contains no JSON", async () => {
+  it("returns undefined when model response contains no JSON", async () => {
     mockGenerateContent.mockResolvedValue({ text: "I cannot determine that." });
 
     const result = await llm.extractName([{ role: "user", content: "Hi" }]);
-    expect(result).toEqual({ found: false });
+    expect(result).toBeUndefined();
   });
 
-  it("returns found false when the API call throws", async () => {
+  it("returns undefined when the API call throws", async () => {
     mockGenerateContent.mockRejectedValue(new Error("API error"));
 
     const result = await llm.extractName([{ role: "user", content: "Hi" }]);
-    expect(result).toEqual({ found: false });
+    expect(result).toBeUndefined();
   });
 
   it("maps assistant role to model in contents", async () => {
-    mockGenerateContent.mockResolvedValue({ text: '{"found":false}' });
+    mockGenerateContent.mockResolvedValue({ text: "{}" });
 
     await llm.extractName([
       { role: "assistant", content: "Hello!" },

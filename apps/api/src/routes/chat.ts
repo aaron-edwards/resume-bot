@@ -17,11 +17,6 @@ function startSseStream(reply: FastifyReply) {
   reply.raw.flushHeaders();
 }
 
-async function resolveUserName(messages: ChatMessage[]): Promise<string | undefined> {
-  const result = await llm.extractName(messages);
-  return result.found ? result.name : undefined;
-}
-
 async function streamAndSave(
   session: { sessionId: string; ip: string; messages: ChatMessage[]; userName?: string },
   reply: FastifyReply,
@@ -89,7 +84,7 @@ export async function chatRoutes(app: FastifyInstance) {
       session.messages = [...session.messages, { role: "user" as const, content: message }];
 
       if (isFirstMessage) {
-        const name = await resolveUserName(session.messages);
+        const name = await llm.extractName(session.messages);
         session.userName = name;
         await sessionStore
           .saveSession(session.sessionId, session.ip, session.messages, name)
