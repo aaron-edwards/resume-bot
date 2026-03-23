@@ -37,7 +37,10 @@ export async function extractName(
     const jsonMatch = text.match(/\{[\s\S]*?\}/);
     if (!jsonMatch) return undefined;
     const parsed = JSON.parse(jsonMatch[0]) as { name?: string };
-    return parsed.name;
+    if (!parsed.name) return undefined;
+    // Strip anything that isn't a letter, space, hyphen, or apostrophe
+    const sanitized = parsed.name.replace(/[^a-zA-Z\s'\-]/g, "").trim();
+    return sanitized || undefined;
   } catch (err) {
     console.error("extractName failed:", err);
     return undefined;

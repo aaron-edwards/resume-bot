@@ -1,3 +1,4 @@
+import sanitizeHtml from "sanitize-html";
 import type { ChatMessage } from "@repo/types";
 import type { LLMClient } from "../lib/llm/types.js";
 import type { SessionStore } from "../lib/sessions/types.js";
@@ -19,8 +20,9 @@ export async function handleChat(
 
   log.info({ message }, "chat request");
 
+  const sanitizedMessage = sanitizeHtml(message, { allowedTags: [], allowedAttributes: {} });
   const isFirstMessage = !session.messages.some((m) => m.role === "user");
-  session.messages = [...session.messages, { role: "user" as const, content: message }];
+  session.messages = [...session.messages, { role: "user" as const, content: sanitizedMessage }];
 
   if (isFirstMessage) {
     const name = await llm.extractName(session.messages);
