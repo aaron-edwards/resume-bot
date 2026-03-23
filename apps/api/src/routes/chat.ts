@@ -1,9 +1,9 @@
 import type { ChatRequestBody } from "@repo/types";
 import type { FastifyRequest } from "fastify";
 import sanitizeHtml from "sanitize-html";
-import type { LLMClient } from "../lib/llm/types.js";
-import type { SessionStore } from "../lib/sessions/types.js";
-import { sanitiseSessionId } from "../lib/utils.js";
+import type { LLMClient } from "../lib/llm/types";
+import type { SessionStore } from "../lib/sessions/types";
+import { sanitiseSessionId } from "../lib/utils";
 
 type ChatRequest = Pick<FastifyRequest<{ Body: ChatRequestBody }>, "body" | "ip">;
 interface Log {

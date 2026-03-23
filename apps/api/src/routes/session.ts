@@ -1,7 +1,7 @@
 import type { ChatMessage } from "@repo/types";
-import type { SessionStore } from "../lib/sessions/types.js";
-import { sanitiseSessionId } from "../lib/utils.js";
-import { COOKIE_MAX_AGE, SESSION_COOKIE } from "./consts.js";
+import type { SessionStore } from "../lib/sessions/types";
+import { sanitiseSessionId } from "../lib/utils";
+import { COOKIE_MAX_AGE, SESSION_COOKIE } from "./consts";
 
 interface Log {
   info(obj: object, msg: string): void;

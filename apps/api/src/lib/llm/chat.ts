@@ -1,12 +1,16 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { GoogleGenAI } from "@google/genai";
 import type { ChatMessage } from "@repo/types";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const resume = readFileSync(join(__dirname, "../../data/resume.md"), "utf-8");
-const personal = readFileSync(join(__dirname, "../../data/personal.md"), "utf-8");
+// In the tsdown bundle __dirname = dist/; in tests __dirname = src/lib/llm/
+const dataDir = existsSync(join(__dirname, "data", "resume.md"))
+  ? join(__dirname, "data")
+  : join(__dirname, "../../data");
+const resume = readFileSync(join(dataDir, "resume.md"), "utf-8");
+const personal = readFileSync(join(dataDir, "personal.md"), "utf-8");
 
 const CHAT_SYSTEM_PROMPT = `You are an assistant helping recruiters and hiring managers learn about a candidate through their resume and experience. Answer questions helpfully and honestly based only on the information provided. If you don't know something, say so.
 

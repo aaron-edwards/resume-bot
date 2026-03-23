@@ -1,6 +1,6 @@
 import type { ChatMessage } from "@repo/types";
 import { vi } from "vitest";
-import { handleChat } from "../chat.js";
+import { handleChat } from "../chat";
 
 async function* mockStream(chunks: string[]) {
   for (const text of chunks) {
