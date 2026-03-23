@@ -17,6 +17,7 @@ export interface AppOptions {
   sessionStore: SessionStore;
   corsOrigin?: string;
   logger?: boolean;
+  routePrefix?: string;
 }
 
 export function buildApp(options: AppOptions) {
@@ -40,8 +41,9 @@ export function buildApp(options: AppOptions) {
     return { status: "ok" };
   });
 
-  app.register(sessionRoutes);
-  app.register(chatRoutes, { corsOrigin });
+  const prefix = options.routePrefix ?? "";
+  app.register(sessionRoutes, { prefix });
+  app.register(chatRoutes, { prefix, corsOrigin });
 
   return app;
 }

@@ -23,6 +23,7 @@ const app = buildApp({
   sessionStore,
   corsOrigin: process.env.CORS_ORIGIN,
   logger: process.env.NODE_ENV !== "test",
+  routePrefix: "/api",
 });
 
 app.log.info(

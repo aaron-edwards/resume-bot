@@ -65,7 +65,7 @@ jobs:
 
       - name: Build frontend
         env:
-          VITE_API_URL: https://resume-bot-api-2nhwokkrna-ts.a.run.app
+          VITE_API_URL: /api
         run: pnpm --filter web build
 
       - name: Deploy frontend to Firebase Hosting

@@ -1,6 +1,6 @@
 import type { ChatMessage, ChatRequestBody } from "@repo/types";
 
-const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
+const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3001/api";
 
 type SseParsed = { text?: string; error?: string };
 
