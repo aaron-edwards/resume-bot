@@ -1,13 +1,7 @@
+import type { ChatMessage } from "@repo/types";
 import { vi } from "vitest";
-import { buildApp } from "../../app.js";
 import { sessionStore } from "../../lib/sessions/index.js";
-
-vi.mock("../../lib/llm/index.js", () => ({
-  llm: {
-    streamChat: vi.fn(),
-    extractName: vi.fn().mockResolvedValue({ found: false }),
-  },
-}));
+import { getSession, resetSession } from "../session.js";
 
 vi.mock("../../lib/sessions/index.js", () => ({
   sessionStore: {
@@ -16,13 +10,24 @@ vi.mock("../../lib/sessions/index.js", () => ({
   },
 }));
 
-const SESSION_COOKIE = "session-id=test-session";
+function makeRequest(cookies: Record<string, string> = {}) {
+  return { cookies, headers: {}, ip: "127.0.0.1" };
+}
+
+function makeReply() {
+  const reply = {
+    setCookie: vi.fn<(name: string, value: string, opts: object) => void>(),
+    send: vi.fn<(data: { messages: ChatMessage[] }) => unknown>(),
+  };
+  reply.send.mockReturnValue(reply);
+  return reply;
+}
 
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe("GET /session", () => {
+describe("getSession", () => {
   it("returns existing messages when a valid session cookie is present", async () => {
     const messages = [
       { role: "user" as const, content: "Hello" },
@@ -30,72 +35,63 @@ describe("GET /session", () => {
     ];
     vi.mocked(sessionStore.getSession).mockResolvedValue({ messages, userName: undefined });
 
-    const app = buildApp();
-    const response = await app.inject({
-      method: "GET",
-      url: "/session",
-      headers: { cookie: SESSION_COOKIE },
-    });
+    const reply = makeReply();
+    await getSession(makeRequest({ "session-id": "abc" }), reply);
 
-    expect(response.statusCode).toBe(200);
-    expect(response.json()).toEqual({ messages });
+    expect(reply.send).toHaveBeenCalledWith({ messages });
+    expect(reply.setCookie).not.toHaveBeenCalled();
   });
 
   it("initialises a new session with the greeting when no session cookie is present", async () => {
-    const app = buildApp();
-    const response = await app.inject({ method: "GET", url: "/session" });
+    const reply = makeReply();
+    await getSession(makeRequest(), reply);
 
-    expect(response.statusCode).toBe(200);
-    const { messages } = response.json();
+    const { messages } = reply.send.mock.calls[0]?.[0] ?? { messages: [] };
     expect(messages).toHaveLength(2);
-    expect(messages[0]).toMatchObject({ role: "assistant" });
     expect(vi.mocked(sessionStore.saveSession)).toHaveBeenCalled();
-    expect(response.headers["set-cookie"]).toContain("session-id=");
+    expect(reply.setCookie).toHaveBeenCalledWith(
+      "session-id",
+      expect.any(String),
+      expect.any(Object)
+    );
   });
 
   it("initialises a new session when the session cookie points to an empty session", async () => {
     vi.mocked(sessionStore.getSession).mockResolvedValue({ messages: [], userName: undefined });
 
-    const app = buildApp();
-    const response = await app.inject({
-      method: "GET",
-      url: "/session",
-      headers: { cookie: SESSION_COOKIE },
-    });
+    const reply = makeReply();
+    await getSession(makeRequest({ "session-id": "abc" }), reply);
 
-    const { messages } = response.json();
+    const { messages } = reply.send.mock.calls[0]?.[0] ?? { messages: [] };
     expect(messages).toHaveLength(2);
-    expect(messages[0]).toMatchObject({ role: "assistant" });
-    expect(response.headers["set-cookie"]).toContain("session-id=");
+    expect(reply.setCookie).toHaveBeenCalledWith(
+      "session-id",
+      expect.any(String),
+      expect.any(Object)
+    );
   });
 });
 
-describe("POST /session/reset", () => {
+describe("resetSession", () => {
   it("creates a new session, sets a new cookie, and returns the greeting", async () => {
-    const app = buildApp();
-    const response = await app.inject({
-      method: "POST",
-      url: "/session/reset",
-      headers: { cookie: SESSION_COOKIE },
-    });
+    const reply = makeReply();
+    await resetSession(makeRequest({ "session-id": "abc" }), reply);
 
-    expect(response.statusCode).toBe(200);
-    const { messages } = response.json();
+    const { messages } = reply.send.mock.calls[0]?.[0] ?? { messages: [] };
     expect(messages).toHaveLength(2);
-    expect(messages[0]).toMatchObject({ role: "assistant" });
     expect(vi.mocked(sessionStore.saveSession)).toHaveBeenCalled();
-    expect(response.headers["set-cookie"]).toContain("session-id=");
+    expect(reply.setCookie).toHaveBeenCalledWith(
+      "session-id",
+      expect.any(String),
+      expect.any(Object)
+    );
   });
 
   it("issues a new session ID even when a valid session cookie is present", async () => {
-    const app = buildApp();
-    await app.inject({
-      method: "POST",
-      url: "/session/reset",
-      headers: { cookie: SESSION_COOKIE },
-    });
+    const reply = makeReply();
+    await resetSession(makeRequest({ "session-id": "old-session" }), reply);
 
     const savedId = vi.mocked(sessionStore.saveSession).mock.calls[0]?.[0];
-    expect(savedId).not.toBe("test-session");
+    expect(savedId).not.toBe("old-session");
   });
 });

@@ -3,7 +3,7 @@ import cors from "@fastify/cors";
 import Fastify from "fastify";
 import llmPlugin from "./plugins/llm/index.js";
 import { chatRoutes } from "./routes/chat.js";
-import { sessionRoutes } from "./routes/session.js";
+import { sessionRoutes } from "./routes/index.js";
 
 export function buildApp() {
   const app = Fastify({
