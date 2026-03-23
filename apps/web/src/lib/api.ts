@@ -1,4 +1,4 @@
-import type { ChatMessage, ChatRequest } from "@repo/types";
+import type { ChatMessage, ChatRequestBody } from "@repo/types";
 
 const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
@@ -8,7 +8,11 @@ function parseSseLine(line: string): SseParsed | "[DONE]" | null {
   if (!line.startsWith("data: ")) return null;
   const data = line.slice(6);
   if (data === "[DONE]") return "[DONE]";
-  return JSON.parse(data) as SseParsed;
+  try {
+    return JSON.parse(data) as SseParsed;
+  } catch {
+    return null;
+  }
 }
 
 export async function getSessionMessages(): Promise<ChatMessage[]> {
@@ -29,7 +33,7 @@ export async function resetSessionRequest(): Promise<ChatMessage[]> {
 }
 
 export async function* streamChatResponse(message: string): AsyncGenerator<string> {
-  const body: ChatRequest = { message };
+  const body: ChatRequestBody = { message };
 
   const response = await fetch(`${apiUrl}/chat`, {
     method: "POST",

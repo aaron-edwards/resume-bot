@@ -6,6 +6,11 @@ import { extractName } from "./lib/llm/extractName.js";
 import { firestoreSessionStore } from "./lib/sessions/firestore.js";
 import { memorySessionStore } from "./lib/sessions/memory.js";
 
+if (!process.env.GEMINI_API_KEY) {
+  console.error("GEMINI_API_KEY environment variable is required");
+  process.exit(1);
+}
+
 const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const sessionStore =
   process.env.SESSION_STORE === "firestore" ? firestoreSessionStore : memorySessionStore;

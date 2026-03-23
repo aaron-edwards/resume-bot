@@ -3,6 +3,6 @@ export type ChatMessage = {
   content: string;
 };
 
-export type ChatRequest = {
+export type ChatRequestBody = {
   message: string;
 };

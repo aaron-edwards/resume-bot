@@ -6,6 +6,7 @@ type Session = {
   updatedAt: Date;
   messages: ChatMessage[];
   userName?: string;
+  ip?: string;
 };
 
 const store = new Map<string, Session>();
@@ -13,10 +14,10 @@ const store = new Map<string, Session>();
 export const memorySessionStore: SessionStore = {
   async getSession(sessionId) {
     const session = store.get(sessionId);
-    return { messages: session?.messages ?? [], userName: session?.userName };
+    return { messages: session?.messages ?? [], userName: session?.userName, ip: session?.ip };
   },
 
-  async saveSession(sessionId, messages, userName?) {
+  async saveSession(sessionId, messages, userName?, ip?) {
     const existing = store.get(sessionId);
     if (existing) {
       store.set(sessionId, {
@@ -31,6 +32,7 @@ export const memorySessionStore: SessionStore = {
         updatedAt: new Date(),
         messages,
         userName,
+        ip,
       });
     }
   },

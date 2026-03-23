@@ -23,7 +23,7 @@ export const firestoreSessionStore: SessionStore = {
     };
   },
 
-  async saveSession(sessionId, messages: ChatMessage[], userName?: string) {
+  async saveSession(sessionId, messages: ChatMessage[], userName?: string, ip?: string) {
     const ref = getDb().collection("sessions").doc(sessionId);
     const doc = await ref.get();
 
@@ -33,6 +33,7 @@ export const firestoreSessionStore: SessionStore = {
         updatedAt: FieldValue.serverTimestamp(),
         messages,
         ...(userName !== undefined && { userName }),
+        ...(ip !== undefined && { ip }),
       });
     } else {
       await ref.update({

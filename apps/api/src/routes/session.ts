@@ -1,6 +1,11 @@
 import type { ChatMessage } from "@repo/types";
 import type { SessionStore } from "../lib/sessions/types.js";
+import { sanitiseSessionId } from "../lib/utils.js";
 import { COOKIE_MAX_AGE, SESSION_COOKIE } from "./consts.js";
+
+interface Log {
+  info(obj: object, msg: string): void;
+}
 
 export interface SessionRequest {
   cookies: Record<string, string | undefined>;
@@ -30,7 +35,8 @@ const GREETING: ChatMessage[] = [
 async function getOrCreateSession(
   sessionId: string | undefined,
   reply: SessionReply,
-  store: SessionStore
+  store: SessionStore,
+  log: Log
 ): Promise<{ sessionId: string; messages: ChatMessage[]; userName?: string }> {
   if (sessionId) {
     const { messages, userName } = await store.getSession(sessionId);
@@ -40,22 +46,25 @@ async function getOrCreateSession(
   const newId = crypto.randomUUID();
   await store.saveSession(newId, GREETING);
   reply.setCookie(SESSION_COOKIE, newId, cookieOptions());
+  log.info({ sessionId: sanitiseSessionId(newId) }, "session created");
   return { sessionId: newId, messages: GREETING };
 }
 
 export async function getSession(
   request: SessionRequest,
   reply: SessionReply,
-  store: SessionStore
+  store: SessionStore,
+  log: Log
 ) {
   const sessionId = request.cookies[SESSION_COOKIE];
-  const { messages } = await getOrCreateSession(sessionId, reply, store);
+  const { messages } = await getOrCreateSession(sessionId, reply, store, log);
   return reply.send({ messages });
 }
 
-export async function resetSession(reply: SessionReply, store: SessionStore) {
+export async function resetSession(reply: SessionReply, store: SessionStore, log: Log) {
   const newId = crypto.randomUUID();
   await store.saveSession(newId, GREETING);
   reply.setCookie(SESSION_COOKIE, newId, cookieOptions());
+  log.info({ sessionId: sanitiseSessionId(newId) }, "session reset");
   return reply.send({ messages: GREETING });
 }
