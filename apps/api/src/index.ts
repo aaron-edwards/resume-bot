@@ -25,6 +25,13 @@ const app = buildApp({
   logger: process.env.NODE_ENV !== "test",
 });
 
+app.log.info(
+  {
+    sessionStore: process.env.SESSION_STORE === "firestore" ? "firstore" : "in memorry",
+  },
+  "Resume Bot built"
+);
+
 try {
   await app.listen({ port: 3001, host: "0.0.0.0" });
 } catch (err) {
