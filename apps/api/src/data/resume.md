@@ -60,6 +60,10 @@ Block is a global fintech company serving 55M+ users across products including C
 **Observability & Infrastructure**
 - Owned Datadog monitoring across 7+ services for 5+ years, established the team's SLO Terraform stack, and maintained on-call responsibilities across the support engineering surface
 
+**Mentorship & Team Growth**
+- Mentored junior engineers across the team, providing guidance on technical craft, code quality, and engineering practices
+- Helped grow junior engineers into more senior roles through hands-on pairing, code reviews, and career development support
+
 ### Thoughtworks — October 2013 to May 2020
 **Consultant Developer → Senior Consultant**
 
