@@ -45,6 +45,7 @@ jobs:
             --set-env-vars GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }},CORS_ORIGIN=https://aaron-edwards-resumebot.web.app,SESSION_STORE=firestore
 
   deploy-web:
+    needs: deploy-api
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
 
@@ -53,6 +54,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Authenticate with GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - uses: pnpm/action-setup@v4
 
