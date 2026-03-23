@@ -42,7 +42,7 @@ jobs:
             --region ${{ env.GCP_REGION }} \
             --platform managed \
             --allow-unauthenticated \
-            --set-env-vars GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }},CORS_ORIGIN=https://aaron-edwards-resumebot.web.app
+            --set-env-vars GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }},CORS_ORIGIN=https://aaron-edwards-resumebot.web.app,SESSION_STORE=firestore
 
   deploy-web:
     if: github.event.workflow_run.conclusion == 'success'
