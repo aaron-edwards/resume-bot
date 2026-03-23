@@ -1,7 +1,7 @@
 {
   "projects": {},
   "targets": {
-    "gen-lang-client-0097374271": {
+    "aaron-edwards-resumebot": {
       "hosting": {
         "main": [
           "aaron-edwards-resumebot"
