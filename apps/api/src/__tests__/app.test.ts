@@ -1,36 +1,6 @@
-import cookie from "@fastify/cookie";
-import cors from "@fastify/cors";
 import type { ChatMessage } from "@repo/types";
-import Fastify from "fastify";
-import fp from "fastify-plugin";
 import { vi } from "vitest";
-import sessionsPlugin from "../plugins/sessions/index.js";
-import { chatRoutes, sessionRoutes } from "../routes/index.js";
-
-function buildTestApp(llm = makeDefaultLlm()) {
-  const app = Fastify({ logger: false });
-
-  app.register(
-    fp(async (fastify) => {
-      fastify.decorate("llm", llm);
-    })
-  );
-  app.register(sessionsPlugin);
-  app.register(cors, { origin: "*", credentials: true });
-  app.register(cookie);
-  app.get("/health", async () => ({ status: "ok" }));
-  app.register(sessionRoutes);
-  app.register(chatRoutes);
-
-  return app;
-}
-
-function makeDefaultLlm() {
-  return {
-    extractName: vi.fn<() => Promise<string | undefined>>().mockResolvedValue(undefined),
-    streamChat: vi.fn().mockReturnValue(mockStream([])),
-  };
-}
+import { buildApp } from "../app.js";
 
 async function* mockStream(chunks: string[]) {
   for (const text of chunks) {
@@ -38,13 +8,31 @@ async function* mockStream(chunks: string[]) {
   }
 }
 
+const { mockExtractName, mockStreamChat } = vi.hoisted(() => ({
+  mockExtractName: vi.fn<() => Promise<string | undefined>>().mockResolvedValue(undefined),
+  mockStreamChat: vi.fn(),
+}));
+
+vi.mock("../plugins/llm/index.js", async () => {
+  const { default: fp } = await import("fastify-plugin");
+  return {
+    default: fp(
+      async (fastify: { decorate: (name: string, value: unknown) => void }) => {
+        fastify.decorate("llm", { extractName: mockExtractName, streamChat: mockStreamChat });
+      },
+      { name: "llm" }
+    ),
+  };
+});
+
 beforeEach(() => {
   vi.clearAllMocks();
+  mockStreamChat.mockReturnValue(mockStream([]));
 });
 
 describe("GET /health", () => {
   it("returns ok", async () => {
-    const app = buildTestApp();
+    const app = buildApp();
     const response = await app.inject({ method: "GET", url: "/health" });
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({ status: "ok" });
@@ -53,7 +41,7 @@ describe("GET /health", () => {
 
 describe("GET /session", () => {
   it("creates a new session and returns the greeting when no cookie is present", async () => {
-    const app = buildTestApp();
+    const app = buildApp();
     await app.ready();
 
     const response = await app.inject({ method: "GET", url: "/session" });
@@ -66,7 +54,7 @@ describe("GET /session", () => {
   });
 
   it("returns existing messages for a valid session", async () => {
-    const app = buildTestApp();
+    const app = buildApp();
     await app.ready();
 
     const sessionId = crypto.randomUUID();
@@ -91,7 +79,7 @@ describe("GET /session", () => {
 
 describe("POST /session/reset", () => {
   it("clears the session and returns the greeting", async () => {
-    const app = buildTestApp();
+    const app = buildApp();
     await app.ready();
 
     const sessionId = crypto.randomUUID();
@@ -113,9 +101,9 @@ describe("POST /session/reset", () => {
 
 describe("POST /chat", () => {
   it("streams a response for a valid session", async () => {
-    const llm = makeDefaultLlm();
-    vi.mocked(llm.streamChat).mockReturnValue(mockStream(["Hello", " world"]));
-    const app = buildTestApp(llm);
+    mockStreamChat.mockReturnValue(mockStream(["Hello", " world"]));
+
+    const app = buildApp();
     await app.ready();
 
     const sessionId = crypto.randomUUID();
@@ -138,7 +126,7 @@ describe("POST /chat", () => {
   });
 
   it("returns 400 when no session cookie is present", async () => {
-    const app = buildTestApp();
+    const app = buildApp();
     await app.ready();
 
     const response = await app.inject({
@@ -152,7 +140,7 @@ describe("POST /chat", () => {
   });
 
   it("returns 400 for missing message body", async () => {
-    const app = buildTestApp();
+    const app = buildApp();
     await app.ready();
 
     const response = await app.inject({ method: "POST", url: "/chat", payload: {} });
@@ -162,7 +150,7 @@ describe("POST /chat", () => {
   });
 
   it("returns 400 when message exceeds 1000 characters", async () => {
-    const app = buildTestApp();
+    const app = buildApp();
     await app.ready();
 
     const response = await app.inject({
