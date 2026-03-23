@@ -45,7 +45,7 @@ describe("extractName", () => {
     expect(result).toBeUndefined();
   });
 
-  it("maps assistant role to model in contents", async () => {
+  it("filters out assistant roles", async () => {
     const client = makeClient({ text: "{}" });
 
     await extractName(client, [
@@ -55,10 +55,7 @@ describe("extractName", () => {
 
     expect(client.models.generateContent).toHaveBeenCalledWith(
       expect.objectContaining({
-        contents: expect.arrayContaining([
-          { role: "model", parts: [{ text: "Hello!" }] },
-          { role: "user", parts: [{ text: "I'm Alex" }] },
-        ]),
+        contents: expect.arrayContaining([{ role: "user", parts: [{ text: "I'm Alex" }] }]),
       })
     );
   });

@@ -60,6 +60,10 @@ Block is a global fintech company serving 55M+ users across products including C
 **Observability & Infrastructure**
 - Owned Datadog monitoring across 7+ services for 5+ years, established the team's SLO Terraform stack, and maintained on-call responsibilities across the support engineering surface
 
+**Mentorship & Team Growth**
+- Mentored junior engineers across the team, providing guidance on technical craft, code quality, and engineering practices
+- Helped grow junior engineers into more senior roles through hands-on pairing, code reviews, and career development support
+
 ### Thoughtworks — October 2013 to May 2020
 **Consultant Developer → Senior Consultant**
 
@@ -69,7 +73,22 @@ Thoughtworks is a global technology consultancy (10,000+ employees, 18 countries
 - Worked internationally across three regions — Australia, Southeast Asia (Indonesia), and Europe (Spain and Germany)
 - Progressed from graduate consultant to Senior Consultant, taking on increasing technical leadership and client-facing responsibilities
 - Practiced and championed Agile methodologies, continuous delivery, test-driven development, and pair programming across all client projects
-- Organised and led Level Up Melbourne, providing mentorship and workshops to help university students launch careers in software
+- Organised and led Level Up Melbourne, a free not-for-profit Thoughtworks initiative running since 2014 that places university students and aspiring developers into teams to build real products over a 7-week intensive program, mentored by industry professionals across TDD, pair programming, agile, and continuous delivery
+
+**Selected Projects**
+- **Retail - Checkout Experience:** Revamped a client's checkout experience
+  - Tech Stack: React (Typescript) 
+- **Banking - Business Lending Dashboard:** Led a team to create a dashboard of data for business lending clients
+  - Tech Stack: React (Typescript), GraphQL (Typescript)
+- **Banking - ACH Processing (Spain):** Was the tech lead for a small team who created the ACH processing for a German based bank
+  - Tech Stack: Spring Boot (Kotlin)
+- **Banking - Support Tooling (Spain):** Was part of a team who created support tooling for the support agents
+  - Tech Stack: React (Typescript), GraphQL, micro front ends
+- **Superannuation - Calculation engine:** Helped extract logic from a legacy application into microservices
+  - Clojure, Delphi
+- **Superannuation - Security Audit:** Was part of a team doing a "Purple Team" exercise
+- **E-Commerce - Online Store:** Part of a team creating experiences for new products on an print-on-demand maretplace
+  - Ruby (Ruby on Rails) 
 
 ## Education
 
