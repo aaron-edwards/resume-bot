@@ -1,5 +1,5 @@
 import type { GoogleGenAI } from "@google/genai";
-import { streamChat } from "../chat.js";
+import { streamChat } from "../chat";
 
 async function* fakeStream(chunks: Array<{ text?: string }>) {
   for (const chunk of chunks) {

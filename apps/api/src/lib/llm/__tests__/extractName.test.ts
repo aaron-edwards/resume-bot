@@ -1,5 +1,5 @@
 import type { GoogleGenAI } from "@google/genai";
-import { extractName } from "../extractName.js";
+import { extractName } from "../extractName";
 
 function makeClient(response: { text?: string } | Error) {
   return {

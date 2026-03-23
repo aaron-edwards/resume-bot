@@ -1,9 +1,9 @@
 import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import Fastify from "fastify";
-import type { LLMClient } from "./lib/llm/types.js";
-import type { SessionStore } from "./lib/sessions/types.js";
-import { chatRoutes, sessionRoutes } from "./routes/index.js";
+import type { LLMClient } from "./lib/llm/types";
+import type { SessionStore } from "./lib/sessions/types";
+import { chatRoutes, sessionRoutes } from "./routes/index";
 
 declare module "fastify" {
   interface FastifyInstance {

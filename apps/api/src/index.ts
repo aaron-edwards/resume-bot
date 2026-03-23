@@ -1,10 +1,10 @@
 import "dotenv/config";
 import { GoogleGenAI } from "@google/genai";
-import { buildApp } from "./app.js";
-import { streamChat } from "./lib/llm/chat.js";
-import { extractName } from "./lib/llm/extractName.js";
-import { firestoreSessionStore } from "./lib/sessions/firestore.js";
-import { memorySessionStore } from "./lib/sessions/memory.js";
+import { buildApp } from "./app";
+import { streamChat } from "./lib/llm/chat";
+import { extractName } from "./lib/llm/extractName";
+import { firestoreSessionStore } from "./lib/sessions/firestore";
+import { memorySessionStore } from "./lib/sessions/memory";
 
 if (!process.env.GEMINI_API_KEY) {
   console.error("GEMINI_API_KEY environment variable is required");

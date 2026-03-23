@@ -1,5 +1,5 @@
 import type { ChatMessage } from "@repo/types";
-import type { SessionStore } from "./types.js";
+import type { SessionStore } from "./types";
 
 type Session = {
   createdAt: Date;

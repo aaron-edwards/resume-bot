@@ -1,10 +1,10 @@
 import rateLimit from "@fastify/rate-limit";
 import type { ChatRequestBody } from "@repo/types";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { serverSideEventStreamWriter } from "../lib/utils.js";
-import { handleChat } from "./chat.js";
-import { SESSION_COOKIE } from "./consts.js";
-import { getSession, resetSession } from "./session.js";
+import { serverSideEventStreamWriter } from "../lib/utils";
+import { handleChat } from "./chat";
+import { SESSION_COOKIE } from "./consts";
+import { getSession, resetSession } from "./session";
 
 export async function sessionRoutes(app: FastifyInstance) {
   app.get("/session", (request, reply) => getSession(request, reply, app.sessions, app.log));
