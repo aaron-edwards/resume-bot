@@ -16,12 +16,10 @@ export default function App() {
             <Spinner />
           </div>
         ) : (
-          <>
-            <Transcript messages={messages} isStreaming={isStreaming} />
-            {error && <p className="text-sm text-destructive text-center">{error}</p>}
-            <ChatInput onSend={sendMessage} isStreaming={isStreaming} />
-          </>
+          <Transcript messages={messages} isStreaming={isStreaming} />
         )}
+        {error && <p className="text-sm text-destructive text-center">{error}</p>}
+        <ChatInput onSend={sendMessage} isStreaming={isStreaming || isLoading} />
       </div>
     </div>
   );
