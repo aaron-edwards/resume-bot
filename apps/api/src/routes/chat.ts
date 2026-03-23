@@ -1,7 +1,6 @@
 import rateLimit from "@fastify/rate-limit";
 import type { ChatMessage, ChatRequest } from "@repo/types";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { sessionStore } from "../lib/sessions/index.js";
 import { SESSION_COOKIE } from "./consts.js";
 
 function startSseStream(reply: FastifyReply) {
@@ -17,7 +16,7 @@ function startSseStream(reply: FastifyReply) {
 }
 
 async function streamAndSave(
-  { llm, log }: FastifyInstance,
+  { llm, log, sessions }: FastifyInstance,
   session: { sessionId: string; messages: ChatMessage[]; userName?: string },
   reply: FastifyReply
 ) {
@@ -32,7 +31,7 @@ async function streamAndSave(
     log.info({ sessionId: session.sessionId, response: assistantResponse }, "chat response");
     reply.raw.write("data: [DONE]\n\n");
 
-    await sessionStore
+    await sessions
       .saveSession(
         session.sessionId,
         [...session.messages, { role: "assistant", content: assistantResponse }],
@@ -71,7 +70,7 @@ export async function chatRoutes(app: FastifyInstance) {
 
       const session = {
         sessionId,
-        ...(await sessionStore.getSession(sessionId)),
+        ...(await app.sessions.getSession(sessionId)),
       };
 
       startSseStream(reply);
@@ -83,7 +82,7 @@ export async function chatRoutes(app: FastifyInstance) {
       if (isFirstMessage) {
         const name = await app.llm.extractName(session.messages);
         session.userName = name;
-        await sessionStore
+        await app.sessions
           .saveSession(session.sessionId, session.messages, name)
           .catch((err) => app.log.error({ err }, "Failed to save userName"));
       }

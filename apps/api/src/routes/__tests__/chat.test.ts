@@ -1,7 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { vi } from "vitest";
 import { buildApp } from "../../app.js";
-import { sessionStore } from "../../lib/sessions/index.js";
 
 vi.mock("../../plugins/llm/index.js", async () => {
   const fp = (await import("fastify-plugin")).default;
@@ -16,12 +15,18 @@ vi.mock("../../plugins/llm/index.js", async () => {
   };
 });
 
-vi.mock("../../lib/sessions/index.js", () => ({
-  sessionStore: {
-    getSession: vi.fn().mockResolvedValue({ messages: [], userName: undefined }),
-    saveSession: vi.fn().mockResolvedValue(undefined),
-  },
-}));
+vi.mock("../../plugins/sessions/index.js", async () => {
+  const fp = (await import("fastify-plugin")).default;
+  return {
+    // biome-ignore lint/suspicious/noExplicitAny: fastify.sessions is decorated by this plugin, not yet typed here
+    default: fp(async (fastify: any) => {
+      fastify.decorate("sessions", {
+        getSession: vi.fn().mockResolvedValue({ messages: [], userName: undefined }),
+        saveSession: vi.fn().mockResolvedValue(undefined),
+      });
+    }),
+  };
+});
 
 async function* mockStream(chunks: string[]) {
   for (const text of chunks) {
@@ -49,7 +54,7 @@ describe("POST /chat", () => {
 
   it("streams chunks as SSE events and ends with [DONE]", async () => {
     vi.mocked(app.llm.streamChat).mockReturnValue(mockStream(["Hello", " world"]));
-    vi.mocked(sessionStore.getSession).mockResolvedValue({
+    vi.mocked(app.sessions.getSession).mockResolvedValue({
       messages: [{ role: "user" as const, content: "prev" }],
       userName: undefined,
     });
@@ -69,7 +74,7 @@ describe("POST /chat", () => {
 
   it("appends message to history loaded from session store", async () => {
     vi.mocked(app.llm.streamChat).mockReturnValue(mockStream([]));
-    vi.mocked(sessionStore.getSession).mockResolvedValue({
+    vi.mocked(app.sessions.getSession).mockResolvedValue({
       messages: [
         { role: "user" as const, content: "Hello" },
         { role: "assistant" as const, content: "Hi there!" },
@@ -100,7 +105,7 @@ describe("POST /chat", () => {
       role: i % 2 === 0 ? ("user" as const) : ("assistant" as const),
       content: `message ${i}`,
     }));
-    vi.mocked(sessionStore.getSession).mockResolvedValue({
+    vi.mocked(app.sessions.getSession).mockResolvedValue({
       messages: history,
       userName: undefined,
     });
@@ -119,7 +124,7 @@ describe("POST /chat", () => {
 
   it("saves the full conversation after streaming completes", async () => {
     vi.mocked(app.llm.streamChat).mockReturnValue(mockStream(["Hello", " world"]));
-    vi.mocked(sessionStore.getSession).mockResolvedValue({
+    vi.mocked(app.sessions.getSession).mockResolvedValue({
       messages: [
         { role: "user" as const, content: "previous" },
         { role: "assistant" as const, content: "response" },
@@ -134,7 +139,7 @@ describe("POST /chat", () => {
       payload: { message: "new message" },
     });
 
-    expect(vi.mocked(sessionStore.saveSession)).toHaveBeenCalledWith(
+    expect(vi.mocked(app.sessions.saveSession)).toHaveBeenCalledWith(
       "test-session",
       [
         { role: "user", content: "previous" },
@@ -154,13 +159,13 @@ describe("POST /chat", () => {
     });
 
     expect(response.statusCode).toBe(400);
-    expect(vi.mocked(sessionStore.getSession)).not.toHaveBeenCalled();
+    expect(vi.mocked(app.sessions.getSession)).not.toHaveBeenCalled();
   });
 
   describe("name extraction", () => {
     it("calls extractName on the first user message", async () => {
       vi.mocked(app.llm.streamChat).mockReturnValue(mockStream([]));
-      vi.mocked(sessionStore.getSession).mockResolvedValue({
+      vi.mocked(app.sessions.getSession).mockResolvedValue({
         messages: [{ role: "assistant" as const, content: "Hi!" }],
         userName: undefined,
       });
@@ -180,7 +185,7 @@ describe("POST /chat", () => {
 
     it("saves userName and passes it to streamChat when a name is found", async () => {
       vi.mocked(app.llm.streamChat).mockReturnValue(mockStream(["Hi Alex!"]));
-      vi.mocked(sessionStore.getSession).mockResolvedValue({
+      vi.mocked(app.sessions.getSession).mockResolvedValue({
         messages: [{ role: "assistant" as const, content: "Hi!" }],
         userName: undefined,
       });
@@ -193,7 +198,7 @@ describe("POST /chat", () => {
         payload: { message: "I'm Alex" },
       });
 
-      expect(vi.mocked(sessionStore.saveSession)).toHaveBeenCalledWith(
+      expect(vi.mocked(app.sessions.saveSession)).toHaveBeenCalledWith(
         "test-session",
         [
           { role: "assistant", content: "Hi!" },
@@ -206,7 +211,7 @@ describe("POST /chat", () => {
 
     it("does not call extractName on subsequent messages", async () => {
       vi.mocked(app.llm.streamChat).mockReturnValue(mockStream([]));
-      vi.mocked(sessionStore.getSession).mockResolvedValue({
+      vi.mocked(app.sessions.getSession).mockResolvedValue({
         messages: [
           { role: "assistant" as const, content: "Hi!" },
           { role: "user" as const, content: "I'm Alex" },
@@ -226,7 +231,7 @@ describe("POST /chat", () => {
 
     it("passes existing userName to streamChat on subsequent messages", async () => {
       vi.mocked(app.llm.streamChat).mockReturnValue(mockStream([]));
-      vi.mocked(sessionStore.getSession).mockResolvedValue({
+      vi.mocked(app.sessions.getSession).mockResolvedValue({
         messages: [
           { role: "assistant" as const, content: "Hi!" },
           { role: "user" as const, content: "I'm Alex" },
@@ -246,7 +251,7 @@ describe("POST /chat", () => {
 
     it("skips saving userName when no name is found", async () => {
       vi.mocked(app.llm.streamChat).mockReturnValue(mockStream([]));
-      vi.mocked(sessionStore.getSession).mockResolvedValue({
+      vi.mocked(app.sessions.getSession).mockResolvedValue({
         messages: [{ role: "assistant" as const, content: "Hi!" }],
         userName: undefined,
       });
@@ -259,7 +264,7 @@ describe("POST /chat", () => {
         payload: { message: "I'd rather not say" },
       });
 
-      const saveCalls = vi.mocked(sessionStore.saveSession).mock.calls;
+      const saveCalls = vi.mocked(app.sessions.saveSession).mock.calls;
       const userNameSaveCall = saveCalls.find((call) => call[2] !== undefined);
       expect(userNameSaveCall).toBeUndefined();
     });
