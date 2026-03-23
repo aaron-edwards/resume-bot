@@ -28,7 +28,7 @@ const app = buildApp({
 
 app.log.info(
   {
-    sessionStore: process.env.SESSION_STORE === "firestore" ? "firstore" : "in memorry",
+    sessionStore: process.env.SESSION_STORE === "firestore" ? "firestore" : "in memory",
   },
   "Resume Bot built"
 );

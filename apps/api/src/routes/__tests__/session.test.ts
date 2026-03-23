@@ -1,6 +1,7 @@
 import type { ChatMessage } from "@repo/types";
 import { vi } from "vitest";
 import type { SessionStore } from "../../lib/sessions/types";
+import { SESSION_COOKIE } from "../consts";
 import { getSession, resetSession } from "../session";
 
 function makeStore(messages: ChatMessage[] = []): SessionStore {
@@ -38,7 +39,7 @@ describe("getSession", () => {
     const store = makeStore(messages);
     const reply = makeReply();
 
-    await getSession(makeRequest({ "session-id": "abc" }), reply, store, makeLog());
+    await getSession(makeRequest({ [SESSION_COOKIE]: "abc" }), reply, store, makeLog());
 
     expect(reply.send).toHaveBeenCalledWith({ messages });
     expect(reply.setCookie).not.toHaveBeenCalled();
@@ -54,7 +55,7 @@ describe("getSession", () => {
     expect(messages).toHaveLength(2);
     expect(store.saveSession).toHaveBeenCalled();
     expect(reply.setCookie).toHaveBeenCalledWith(
-      "session-id",
+      SESSION_COOKIE,
       expect.any(String),
       expect.any(Object)
     );
@@ -64,12 +65,12 @@ describe("getSession", () => {
     const store = makeStore();
     const reply = makeReply();
 
-    await getSession(makeRequest({ "session-id": "abc" }), reply, store, makeLog());
+    await getSession(makeRequest({ [SESSION_COOKIE]: "abc" }), reply, store, makeLog());
 
     const { messages } = reply.send.mock.calls[0]?.[0] ?? { messages: [] };
     expect(messages).toHaveLength(2);
     expect(reply.setCookie).toHaveBeenCalledWith(
-      "session-id",
+      SESSION_COOKIE,
       expect.any(String),
       expect.any(Object)
     );
@@ -87,7 +88,7 @@ describe("resetSession", () => {
     expect(messages).toHaveLength(2);
     expect(store.saveSession).toHaveBeenCalled();
     expect(reply.setCookie).toHaveBeenCalledWith(
-      "session-id",
+      SESSION_COOKIE,
       expect.any(String),
       expect.any(Object)
     );
