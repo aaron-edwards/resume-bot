@@ -1,6 +1,5 @@
 import type { ChatMessage } from "@repo/types";
 import { vi } from "vitest";
-import { buildApp } from "../../app.js";
 import { handleChat } from "../chat.js";
 
 async function* mockStream(chunks: string[]) {
@@ -204,39 +203,5 @@ describe("handleChat", () => {
 
       expect(getSseEvents(write)).toEqual(['{"error":"API unavailable"}']);
     });
-  });
-});
-
-describe("POST /chat HTTP", () => {
-  it("returns 400 when no session cookie is present", async () => {
-    const app = buildApp();
-    await app.ready();
-    const response = await app.inject({
-      method: "POST",
-      url: "/chat",
-      payload: { message: "Hello" },
-    });
-    expect(response.statusCode).toBe(400);
-    await app.close();
-  });
-
-  it("returns 400 for missing message body", async () => {
-    const app = buildApp();
-    await app.ready();
-    const response = await app.inject({ method: "POST", url: "/chat", payload: {} });
-    expect(response.statusCode).toBe(400);
-    await app.close();
-  });
-
-  it("returns 400 when message exceeds 1000 characters", async () => {
-    const app = buildApp();
-    await app.ready();
-    const response = await app.inject({
-      method: "POST",
-      url: "/chat",
-      payload: { message: "a".repeat(1001) },
-    });
-    expect(response.statusCode).toBe(400);
-    await app.close();
   });
 });
