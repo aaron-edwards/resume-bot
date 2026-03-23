@@ -1,20 +1,18 @@
 import type { ChatMessage } from "@repo/types";
 import { sessionStore } from "../lib/sessions/index.js";
 import { getIp } from "../lib/utils.js";
-import { SESSION_COOKIE } from "./shared.js";
+import { COOKIE_MAX_AGE, SESSION_COOKIE } from "./consts.js";
 
-interface SessionRequest {
+export interface SessionRequest {
   cookies: Record<string, string | undefined>;
   headers: Record<string, string | string[] | undefined>;
   ip: string;
 }
 
-interface SessionReply {
-  setCookie(name: string, value: string, opts: object): void;
-  send(data: unknown): unknown;
+export interface SessionReply {
+  setCookie(name: string, value: string, options?: object): void;
+  send(data: { messages: ChatMessage[] }): void;
 }
-
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 
 function cookieOptions() {
   const isProduction = process.env.NODE_ENV === "production";
@@ -35,7 +33,7 @@ const GREETING: ChatMessage[] = [
 async function getOrCreateSession(
   sessionId: string | undefined,
   ip: string,
-  reply: { setCookie: (name: string, value: string, opts: object) => void }
+  reply: SessionReply
 ): Promise<{ sessionId: string; messages: ChatMessage[]; userName?: string }> {
   if (sessionId) {
     const { messages, userName } = await sessionStore.getSession(sessionId);

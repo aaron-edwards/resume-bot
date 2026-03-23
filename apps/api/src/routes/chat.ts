@@ -3,7 +3,7 @@ import type { ChatMessage, ChatRequest } from "@repo/types";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { sessionStore } from "../lib/sessions/index.js";
 import { getIp } from "../lib/utils.js";
-import { SESSION_COOKIE } from "./shared.js";
+import { SESSION_COOKIE } from "./consts.js";
 
 function startSseStream(reply: FastifyReply) {
   reply.raw.setHeader("Content-Type", "text/event-stream");

@@ -15,12 +15,10 @@ function makeRequest(cookies: Record<string, string> = {}) {
 }
 
 function makeReply() {
-  const reply = {
-    setCookie: vi.fn<(name: string, value: string, opts: object) => void>(),
-    send: vi.fn<(data: { messages: ChatMessage[] }) => unknown>(),
+  return {
+    setCookie: vi.fn(),
+    send: vi.fn<(data: { messages: ChatMessage[] }) => void>(),
   };
-  reply.send.mockReturnValue(reply);
-  return reply;
 }
 
 beforeEach(() => {
