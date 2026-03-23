@@ -53,11 +53,7 @@ export async function getSession(
   return reply.send({ messages });
 }
 
-export async function resetSession(
-  _request: SessionRequest,
-  reply: SessionReply,
-  store: SessionStore
-) {
+export async function resetSession(reply: SessionReply, store: SessionStore) {
   const newId = crypto.randomUUID();
   await store.saveSession(newId, GREETING);
   reply.setCookie(SESSION_COOKIE, newId, cookieOptions());

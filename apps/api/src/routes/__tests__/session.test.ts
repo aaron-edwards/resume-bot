@@ -77,7 +77,7 @@ describe("resetSession", () => {
     const store = makeStore();
     const reply = makeReply();
 
-    await resetSession(makeRequest({ "session-id": "abc" }), reply, store);
+    await resetSession(reply, store);
 
     const { messages } = reply.send.mock.calls[0]?.[0] ?? { messages: [] };
     expect(messages).toHaveLength(2);
@@ -89,10 +89,10 @@ describe("resetSession", () => {
     );
   });
 
-  it("issues a new session ID even when a valid session cookie is present", async () => {
+  it("always issues a fresh session ID", async () => {
     const store = makeStore();
 
-    await resetSession(makeRequest({ "session-id": "old-session" }), makeReply(), store);
+    await resetSession(makeReply(), store);
 
     const savedId = vi.mocked(store.saveSession).mock.calls[0]?.[0];
     expect(savedId).not.toBe("old-session");
