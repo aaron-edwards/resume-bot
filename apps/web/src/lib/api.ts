@@ -1,4 +1,4 @@
-import type { ChatMessage, ChatRequest } from "@repo/types";
+import type { ChatMessage, ChatRequestBody } from "@repo/types";
 
 const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
@@ -33,7 +33,7 @@ export async function resetSessionRequest(): Promise<ChatMessage[]> {
 }
 
 export async function* streamChatResponse(message: string): AsyncGenerator<string> {
-  const body: ChatRequest = { message };
+  const body: ChatRequestBody = { message };
 
   const response = await fetch(`${apiUrl}/chat`, {
     method: "POST",

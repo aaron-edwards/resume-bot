@@ -85,7 +85,14 @@ describe("handleChat", () => {
     const llm = makeLlm();
     vi.mocked(llm.streamChat).mockReturnValue(mockStream(["Hello", " world"]));
 
-    await handleChat(makeRequest("new message"), "test-session", makeWrite(), sessions, llm, makeLog());
+    await handleChat(
+      makeRequest("new message"),
+      "test-session",
+      makeWrite(),
+      sessions,
+      llm,
+      makeLog()
+    );
 
     expect(vi.mocked(sessions.saveSession)).toHaveBeenCalledWith(
       "test-session",
@@ -124,7 +131,14 @@ describe("handleChat", () => {
       vi.mocked(llm.extractName).mockResolvedValue("Alex");
       vi.mocked(llm.streamChat).mockReturnValue(mockStream(["Hi Alex!"]));
 
-      await handleChat(makeRequest("I'm Alex"), "test-session", makeWrite(), sessions, llm, makeLog());
+      await handleChat(
+        makeRequest("I'm Alex"),
+        "test-session",
+        makeWrite(),
+        sessions,
+        llm,
+        makeLog()
+      );
 
       expect(vi.mocked(sessions.saveSession)).toHaveBeenCalledWith(
         "test-session",
@@ -181,7 +195,14 @@ describe("handleChat", () => {
       const llm = makeLlm();
       vi.mocked(llm.extractName).mockResolvedValue(undefined);
 
-      await handleChat(makeRequest("no name"), "test-session", makeWrite(), sessions, llm, makeLog());
+      await handleChat(
+        makeRequest("no name"),
+        "test-session",
+        makeWrite(),
+        sessions,
+        llm,
+        makeLog()
+      );
 
       const saveCalls = vi.mocked(sessions.saveSession).mock.calls;
       expect(saveCalls.find((call) => call[2] !== undefined)).toBeUndefined();

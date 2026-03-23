@@ -1,6 +1,6 @@
-import sanitizeHtml from "sanitize-html";
 import type { ChatRequestBody } from "@repo/types";
 import type { FastifyRequest } from "fastify";
+import sanitizeHtml from "sanitize-html";
 import type { LLMClient } from "../lib/llm/types.js";
 import type { SessionStore } from "../lib/sessions/types.js";
 import { sanitiseSessionId } from "../lib/utils.js";
