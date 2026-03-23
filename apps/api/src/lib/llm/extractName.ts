@@ -3,10 +3,12 @@ import type { ChatMessage } from "@repo/types";
 
 function buildContents(messages: ChatMessage[]) {
   return [
-    ...messages.map((m) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.content }],
-    })),
+    ...messages
+      .filter((m) => m.role === "user")
+      .map((m) => ({
+        role: "user" as const,
+        parts: [{ text: m.content }],
+      })),
     {
       role: "user",
       parts: [
