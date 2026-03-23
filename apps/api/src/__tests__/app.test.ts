@@ -1,7 +1,7 @@
 import type { ChatMessage } from "@repo/types";
 import { vi } from "vitest";
 import { buildApp } from "../app.js";
-import { memorySessionStore } from "../plugins/sessions/memory.js";
+import { memorySessionStore } from "../lib/sessions/memory.js";
 
 async function* mockStream(chunks: string[]) {
   for (const text of chunks) {

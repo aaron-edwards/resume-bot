@@ -1,6 +1,6 @@
 import type { ChatMessage } from "@repo/types";
 import { vi } from "vitest";
-import type { SessionStore } from "../../plugins/sessions/index.js";
+import type { SessionStore } from "../../lib/sessions/types.js";
 import { getSession, resetSession } from "../session.js";
 
 function makeStore(messages: ChatMessage[] = []): SessionStore {

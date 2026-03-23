@@ -1,14 +1,19 @@
 import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import Fastify from "fastify";
-import type { LlmInterface } from "./plugins/llm/index.js";
-import llmPlugin from "./plugins/llm/index.js";
-import sessionsPlugin from "./plugins/sessions/index.js";
-import type { SessionStore } from "./plugins/sessions/index.js";
+import type { LLMClient } from "./lib/llm/types.js";
+import type { SessionStore } from "./lib/sessions/types.js";
 import { chatRoutes, sessionRoutes } from "./routes/index.js";
 
+declare module "fastify" {
+  interface FastifyInstance {
+    llm: LLMClient;
+    sessions: SessionStore;
+  }
+}
+
 export interface AppOptions {
-  llm: LlmInterface;
+  llm: LLMClient;
   sessionStore: SessionStore;
   corsOrigin?: string;
   logger?: boolean;
@@ -21,8 +26,8 @@ export function buildApp(options: AppOptions) {
     logger: options.logger ?? false,
   });
 
-  app.register(llmPlugin, { llm: options.llm });
-  app.register(sessionsPlugin, { store: options.sessionStore });
+  app.decorate("llm", options.llm);
+  app.decorate("sessions", options.sessionStore);
 
   app.register(cors, {
     origin: corsOrigin,

@@ -1,10 +1,10 @@
 import "dotenv/config";
 import { GoogleGenAI } from "@google/genai";
 import { buildApp } from "./app.js";
-import { streamChat } from "./plugins/llm/chat.js";
-import { extractName } from "./plugins/llm/extractName.js";
-import { firestoreSessionStore } from "./plugins/sessions/firestore.js";
-import { memorySessionStore } from "./plugins/sessions/memory.js";
+import { streamChat } from "./lib/llm/chat.js";
+import { extractName } from "./lib/llm/extractName.js";
+import { firestoreSessionStore } from "./lib/sessions/firestore.js";
+import { memorySessionStore } from "./lib/sessions/memory.js";
 
 const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const sessionStore =

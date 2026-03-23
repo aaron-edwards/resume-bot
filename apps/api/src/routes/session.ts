@@ -1,5 +1,5 @@
 import type { ChatMessage } from "@repo/types";
-import type { SessionStore } from "../plugins/sessions/index.js";
+import type { SessionStore } from "../lib/sessions/types.js";
 import { COOKIE_MAX_AGE, SESSION_COOKIE } from "./consts.js";
 
 export interface SessionRequest {
