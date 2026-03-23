@@ -1,26 +1,20 @@
-import { GoogleGenAI } from "@google/genai";
 import type { ChatMessage } from "@repo/types";
 import type { FastifyPluginAsync } from "fastify";
 import fp from "fastify-plugin";
-import { streamChat } from "./chat.js";
-import { extractName } from "./extractName.js";
+
+export interface LlmInterface {
+  extractName(messages: ChatMessage[]): Promise<string | undefined>;
+  streamChat(messages: ChatMessage[], userName?: string): AsyncGenerator<string>;
+}
 
 declare module "fastify" {
   interface FastifyInstance {
-    llm: {
-      extractName: (messages: ChatMessage[]) => Promise<string | undefined>;
-      streamChat: (messages: ChatMessage[], userName?: string) => AsyncGenerator<string>;
-    };
+    llm: LlmInterface;
   }
 }
 
-const llmPlugin: FastifyPluginAsync = async (fastify) => {
-  const client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-  fastify.decorate("llm", {
-    extractName: (messages) => extractName(client, messages),
-    streamChat: (messages, userName) => streamChat(client, messages, userName),
-  });
+const llmPlugin: FastifyPluginAsync<{ llm: LlmInterface }> = async (fastify, opts) => {
+  fastify.decorate("llm", opts.llm);
 };
 
-export default fp(llmPlugin, { name: "llm" });
+export default fp<{ llm: LlmInterface }>(llmPlugin, { name: "llm" });

@@ -11,7 +11,7 @@ export async function sessionRoutes(app: FastifyInstance) {
   app.post("/session/reset", (_, reply) => resetSession(reply, app.sessions));
 }
 
-export async function chatRoutes(app: FastifyInstance) {
+export async function chatRoutes(app: FastifyInstance, opts: { corsOrigin: string }) {
   await app.register(rateLimit, { max: 5, timeWindow: "1 minute" });
 
   app.post<{ Body: ChatRequest }>(
@@ -31,7 +31,7 @@ export async function chatRoutes(app: FastifyInstance) {
       const sessionId = request.cookies[SESSION_COOKIE];
       if (!sessionId) return reply.status(400).send({ error: "No session" });
 
-      return serverSideEventStreamWriter(reply, (write) =>
+      return serverSideEventStreamWriter(reply, opts.corsOrigin, (write) =>
         handleChat(request.body.message, sessionId, write, app.sessions, app.llm, app.log)
       );
     }
