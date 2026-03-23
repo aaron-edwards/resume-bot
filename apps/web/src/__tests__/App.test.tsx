@@ -46,7 +46,7 @@ it("happy path: start session → reply → streaming → reset → greeting", a
 
 it("error path: send message → see error → reset clears it", async () => {
   server.use(
-    http.post("http://localhost:3001/chat", () => new HttpResponse(null, { status: 500 }))
+    http.post("http://localhost:3001/api/chat", () => new HttpResponse(null, { status: 500 }))
   );
 
   renderApp();
