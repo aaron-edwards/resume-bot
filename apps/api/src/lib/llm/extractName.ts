@@ -34,11 +34,12 @@ export async function extractName(
       contents: buildContents(messages),
     });
     const text = response.text ?? "";
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    const jsonMatch = text.match(/\{[\s\S]*?\}/);
     if (!jsonMatch) return undefined;
     const parsed = JSON.parse(jsonMatch[0]) as { name?: string };
     return parsed.name;
-  } catch {
+  } catch (err) {
+    console.error("extractName failed:", err);
     return undefined;
   }
 }

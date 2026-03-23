@@ -8,7 +8,11 @@ function parseSseLine(line: string): SseParsed | "[DONE]" | null {
   if (!line.startsWith("data: ")) return null;
   const data = line.slice(6);
   if (data === "[DONE]") return "[DONE]";
-  return JSON.parse(data) as SseParsed;
+  try {
+    return JSON.parse(data) as SseParsed;
+  } catch {
+    return null;
+  }
 }
 
 export async function getSessionMessages(): Promise<ChatMessage[]> {

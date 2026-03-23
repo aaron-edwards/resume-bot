@@ -17,7 +17,7 @@ export async function handleChat(
 ) {
   const session = { sessionId, ...(await sessions.getSession(sessionId)) };
 
-  log.info({ sessionId, message }, "chat request");
+  log.info({ message }, "chat request");
 
   const isFirstMessage = !session.messages.some((m) => m.role === "user");
   session.messages = [...session.messages, { role: "user" as const, content: message }];
@@ -38,7 +38,7 @@ export async function handleChat(
       write(`data: ${JSON.stringify({ text })}\n\n`);
     }
 
-    log.info({ sessionId, response: assistantResponse }, "chat response");
+    log.info({ response: assistantResponse }, "chat response");
     write("data: [DONE]\n\n");
 
     await sessions
