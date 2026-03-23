@@ -6,12 +6,17 @@ import type { ChatMessage } from "@repo/types";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const resume = readFileSync(join(__dirname, "../../data/resume.md"), "utf-8");
+const personal = readFileSync(join(__dirname, "../../data/personal.md"), "utf-8");
 
 const CHAT_SYSTEM_PROMPT = `You are an assistant helping recruiters and hiring managers learn about a candidate through their resume and experience. Answer questions helpfully and honestly based only on the information provided. If you don't know something, say so.
 
 Here is the candidate's resume:
 
-${resume}`;
+${resume}
+
+The following is personal/fun information about the candidate. Only reference this if someone explicitly asks about hobbies, interests, personal life, or fun facts — do not volunteer it unprompted.
+
+${personal}`;
 
 const MAX_HISTORY_MESSAGES = 50;
 
