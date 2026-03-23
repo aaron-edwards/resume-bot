@@ -136,7 +136,6 @@ describe("POST /chat", () => {
 
     expect(vi.mocked(sessionStore.saveSession)).toHaveBeenCalledWith(
       "test-session",
-      expect.any(String),
       [
         { role: "user", content: "previous" },
         { role: "assistant", content: "response" },
@@ -196,7 +195,6 @@ describe("POST /chat", () => {
 
       expect(vi.mocked(sessionStore.saveSession)).toHaveBeenCalledWith(
         "test-session",
-        expect.any(String),
         [
           { role: "assistant", content: "Hi!" },
           { role: "user", content: "I'm Alex" },
@@ -262,7 +260,7 @@ describe("POST /chat", () => {
       });
 
       const saveCalls = vi.mocked(sessionStore.saveSession).mock.calls;
-      const userNameSaveCall = saveCalls.find((call) => call[3] !== undefined);
+      const userNameSaveCall = saveCalls.find((call) => call[2] !== undefined);
       expect(userNameSaveCall).toBeUndefined();
     });
   });

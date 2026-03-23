@@ -23,13 +23,12 @@ export const firestoreSessionStore: SessionStore = {
     };
   },
 
-  async saveSession(sessionId, ipAddress, messages: ChatMessage[], userName?: string) {
+  async saveSession(sessionId, messages: ChatMessage[], userName?: string) {
     const ref = getDb().collection("sessions").doc(sessionId);
     const doc = await ref.get();
 
     if (!doc.exists) {
       await ref.set({
-        ipAddress,
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
         messages,
@@ -37,7 +36,6 @@ export const firestoreSessionStore: SessionStore = {
       });
     } else {
       await ref.update({
-        ipAddress,
         updatedAt: FieldValue.serverTimestamp(),
         messages,
         ...(userName !== undefined && { userName }),

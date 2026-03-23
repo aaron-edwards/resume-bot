@@ -11,7 +11,7 @@ vi.mock("../../lib/sessions/index.js", () => ({
 }));
 
 function makeRequest(cookies: Record<string, string> = {}) {
-  return { cookies, headers: {}, ip: "127.0.0.1" };
+  return { cookies };
 }
 
 function makeReply() {

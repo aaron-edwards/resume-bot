@@ -2,7 +2,6 @@ import rateLimit from "@fastify/rate-limit";
 import type { ChatMessage, ChatRequest } from "@repo/types";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { sessionStore } from "../lib/sessions/index.js";
-import { getIp } from "../lib/utils.js";
 import { SESSION_COOKIE } from "./consts.js";
 
 function startSseStream(reply: FastifyReply) {
@@ -19,7 +18,7 @@ function startSseStream(reply: FastifyReply) {
 
 async function streamAndSave(
   { llm, log }: FastifyInstance,
-  session: { sessionId: string; ip: string; messages: ChatMessage[]; userName?: string },
+  session: { sessionId: string; messages: ChatMessage[]; userName?: string },
   reply: FastifyReply
 ) {
   let assistantResponse = "";
@@ -36,7 +35,6 @@ async function streamAndSave(
     await sessionStore
       .saveSession(
         session.sessionId,
-        session.ip,
         [...session.messages, { role: "assistant", content: assistantResponse }],
         session.userName
       )
@@ -73,12 +71,11 @@ export async function chatRoutes(app: FastifyInstance) {
 
       const session = {
         sessionId,
-        ip: getIp(request),
         ...(await sessionStore.getSession(sessionId)),
       };
 
       startSseStream(reply);
-      app.log.info({ sessionId: session.sessionId, ip: session.ip, message }, "chat request");
+      app.log.info({ sessionId: session.sessionId, message }, "chat request");
 
       const isFirstMessage = !session.messages.some((m) => m.role === "user");
       session.messages = [...session.messages, { role: "user" as const, content: message }];
@@ -87,7 +84,7 @@ export async function chatRoutes(app: FastifyInstance) {
         const name = await app.llm.extractName(session.messages);
         session.userName = name;
         await sessionStore
-          .saveSession(session.sessionId, session.ip, session.messages, name)
+          .saveSession(session.sessionId, session.messages, name)
           .catch((err) => app.log.error({ err }, "Failed to save userName"));
       }
 
