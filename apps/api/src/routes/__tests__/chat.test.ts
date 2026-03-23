@@ -8,6 +8,10 @@ async function* mockStream(chunks: string[]) {
   }
 }
 
+function makeRequest(message: string, ip = "127.0.0.1") {
+  return { body: { message }, ip };
+}
+
 function makeSessions(messages: ChatMessage[] = [], userName?: string) {
   return {
     getSession: vi.fn().mockResolvedValue({ messages, userName }),
@@ -45,7 +49,7 @@ describe("handleChat", () => {
     vi.mocked(llm.streamChat).mockReturnValue(mockStream(["Hello", " world"]));
     const write = makeWrite();
 
-    await handleChat("Hi", "test-session", write, sessions, llm, makeLog());
+    await handleChat(makeRequest("Hi"), "test-session", write, sessions, llm, makeLog());
 
     expect(getSseEvents(write)).toEqual(['{"text":"Hello"}', '{"text":" world"}', "[DONE]"]);
   });
@@ -58,7 +62,7 @@ describe("handleChat", () => {
     const llm = makeLlm();
 
     await handleChat(
-      "How are you?",
+      makeRequest("How are you?"),
       "test-session",
       makeWrite(),
       makeSessions(history),
@@ -81,7 +85,7 @@ describe("handleChat", () => {
     const llm = makeLlm();
     vi.mocked(llm.streamChat).mockReturnValue(mockStream(["Hello", " world"]));
 
-    await handleChat("new message", "test-session", makeWrite(), sessions, llm, makeLog());
+    await handleChat(makeRequest("new message"), "test-session", makeWrite(), sessions, llm, makeLog());
 
     expect(vi.mocked(sessions.saveSession)).toHaveBeenCalledWith(
       "test-session",
@@ -100,7 +104,7 @@ describe("handleChat", () => {
       const llm = makeLlm();
 
       await handleChat(
-        "I'm Alex",
+        makeRequest("I'm Alex"),
         "test-session",
         makeWrite(),
         makeSessions([{ role: "assistant", content: "Hi!" }]),
@@ -120,7 +124,7 @@ describe("handleChat", () => {
       vi.mocked(llm.extractName).mockResolvedValue("Alex");
       vi.mocked(llm.streamChat).mockReturnValue(mockStream(["Hi Alex!"]));
 
-      await handleChat("I'm Alex", "test-session", makeWrite(), sessions, llm, makeLog());
+      await handleChat(makeRequest("I'm Alex"), "test-session", makeWrite(), sessions, llm, makeLog());
 
       expect(vi.mocked(sessions.saveSession)).toHaveBeenCalledWith(
         "test-session",
@@ -128,7 +132,8 @@ describe("handleChat", () => {
           { role: "assistant", content: "Hi!" },
           { role: "user", content: "I'm Alex" },
         ],
-        "Alex"
+        "Alex",
+        "127.0.0.1"
       );
       expect(vi.mocked(llm.streamChat)).toHaveBeenCalledWith(expect.any(Array), "Alex");
     });
@@ -141,7 +146,7 @@ describe("handleChat", () => {
       const llm = makeLlm();
 
       await handleChat(
-        "Tell me about Aaron",
+        makeRequest("Tell me about Aaron"),
         "test-session",
         makeWrite(),
         makeSessions(history, "Alex"),
@@ -160,7 +165,7 @@ describe("handleChat", () => {
       const llm = makeLlm();
 
       await handleChat(
-        "Tell me about Aaron",
+        makeRequest("Tell me about Aaron"),
         "test-session",
         makeWrite(),
         makeSessions(history, "Alex"),
@@ -176,7 +181,7 @@ describe("handleChat", () => {
       const llm = makeLlm();
       vi.mocked(llm.extractName).mockResolvedValue(undefined);
 
-      await handleChat("no name", "test-session", makeWrite(), sessions, llm, makeLog());
+      await handleChat(makeRequest("no name"), "test-session", makeWrite(), sessions, llm, makeLog());
 
       const saveCalls = vi.mocked(sessions.saveSession).mock.calls;
       expect(saveCalls.find((call) => call[2] !== undefined)).toBeUndefined();
@@ -193,7 +198,7 @@ describe("handleChat", () => {
       const write = makeWrite();
 
       await handleChat(
-        "Hi",
+        makeRequest("Hi"),
         "test-session",
         write,
         makeSessions([{ role: "user", content: "prev" }]),

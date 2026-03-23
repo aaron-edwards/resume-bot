@@ -1,5 +1,11 @@
 import type { FastifyReply } from "fastify";
 
+export function sanitiseSessionId(sessionId: string): string {
+  const parts = sessionId.split("-");
+  if (parts.length !== 5) return "[invalid-session-id]";
+  return `${parts[0]}-xxxx-xxxx-xxxx-${parts[4]}`;
+}
+
 export async function serverSideEventStreamWriter(
   reply: FastifyReply,
   corsOrigin: string,

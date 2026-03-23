@@ -21,6 +21,10 @@ function makeReply() {
   };
 }
 
+function makeLog() {
+  return { info: vi.fn() };
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
 });
@@ -34,7 +38,7 @@ describe("getSession", () => {
     const store = makeStore(messages);
     const reply = makeReply();
 
-    await getSession(makeRequest({ "session-id": "abc" }), reply, store);
+    await getSession(makeRequest({ "session-id": "abc" }), reply, store, makeLog());
 
     expect(reply.send).toHaveBeenCalledWith({ messages });
     expect(reply.setCookie).not.toHaveBeenCalled();
@@ -44,7 +48,7 @@ describe("getSession", () => {
     const store = makeStore();
     const reply = makeReply();
 
-    await getSession(makeRequest(), reply, store);
+    await getSession(makeRequest(), reply, store, makeLog());
 
     const { messages } = reply.send.mock.calls[0]?.[0] ?? { messages: [] };
     expect(messages).toHaveLength(2);
@@ -60,7 +64,7 @@ describe("getSession", () => {
     const store = makeStore();
     const reply = makeReply();
 
-    await getSession(makeRequest({ "session-id": "abc" }), reply, store);
+    await getSession(makeRequest({ "session-id": "abc" }), reply, store, makeLog());
 
     const { messages } = reply.send.mock.calls[0]?.[0] ?? { messages: [] };
     expect(messages).toHaveLength(2);
@@ -77,7 +81,7 @@ describe("resetSession", () => {
     const store = makeStore();
     const reply = makeReply();
 
-    await resetSession(reply, store);
+    await resetSession(reply, store, makeLog());
 
     const { messages } = reply.send.mock.calls[0]?.[0] ?? { messages: [] };
     expect(messages).toHaveLength(2);
@@ -92,7 +96,7 @@ describe("resetSession", () => {
   it("always issues a fresh session ID", async () => {
     const store = makeStore();
 
-    await resetSession(makeReply(), store);
+    await resetSession(makeReply(), store, makeLog());
 
     const savedId = vi.mocked(store.saveSession).mock.calls[0]?.[0];
     expect(savedId).not.toBe("old-session");

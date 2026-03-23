@@ -1,20 +1,20 @@
 import rateLimit from "@fastify/rate-limit";
-import type { ChatRequest } from "@repo/types";
+import type { ChatRequestBody } from "@repo/types";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { serverSideEventStreamWriter } from "../lib/sse.js";
+import { serverSideEventStreamWriter } from "../lib/utils.js";
 import { handleChat } from "./chat.js";
 import { SESSION_COOKIE } from "./consts.js";
 import { getSession, resetSession } from "./session.js";
 
 export async function sessionRoutes(app: FastifyInstance) {
-  app.get("/session", (request, reply) => getSession(request, reply, app.sessions));
-  app.post("/session/reset", (_, reply) => resetSession(reply, app.sessions));
+  app.get("/session", (request, reply) => getSession(request, reply, app.sessions, app.log));
+  app.post("/session/reset", (_, reply) => resetSession(reply, app.sessions, app.log));
 }
 
 export async function chatRoutes(app: FastifyInstance, opts: { corsOrigin: string }) {
   await app.register(rateLimit, { max: 5, timeWindow: "1 minute" });
 
-  app.post<{ Body: ChatRequest }>(
+  app.post<{ Body: ChatRequestBody }>(
     "/chat",
     {
       schema: {
@@ -27,12 +27,12 @@ export async function chatRoutes(app: FastifyInstance, opts: { corsOrigin: strin
         },
       },
     },
-    async (request: FastifyRequest<{ Body: ChatRequest }>, reply: FastifyReply) => {
+    async (request: FastifyRequest<{ Body: ChatRequestBody }>, reply: FastifyReply) => {
       const sessionId = request.cookies[SESSION_COOKIE];
       if (!sessionId) return reply.status(400).send({ error: "No session" });
 
       return serverSideEventStreamWriter(reply, opts.corsOrigin, (write) =>
-        handleChat(request.body.message, sessionId, write, app.sessions, app.llm, app.log)
+        handleChat(request, sessionId, write, app.sessions, app.llm, app.log)
       );
     }
   );
