@@ -1,10 +1,6 @@
 import type { ChatMessage } from "@repo/types";
-import type { SessionStore } from "../plugins/sessions/index.js";
-
-interface Llm {
-  extractName(messages: ChatMessage[]): Promise<string | undefined>;
-  streamChat(messages: ChatMessage[], userName?: string): AsyncGenerator<string>;
-}
+import type { LLMClient } from "../lib/llm/types.js";
+import type { SessionStore } from "../lib/sessions/types.js";
 
 interface Log {
   info(obj: object, msg: string): void;
@@ -16,7 +12,7 @@ export async function handleChat(
   sessionId: string,
   write: (data: string) => void,
   sessions: SessionStore,
-  llm: Llm,
+  llm: LLMClient,
   log: Log
 ) {
   const session = { sessionId, ...(await sessions.getSession(sessionId)) };

@@ -1,6 +1,7 @@
 import type { ChatMessage } from "@repo/types";
 import { vi } from "vitest";
 import { buildApp } from "../app.js";
+import { memorySessionStore } from "../lib/sessions/memory.js";
 
 async function* mockStream(chunks: string[]) {
   for (const text of chunks) {
@@ -8,31 +9,19 @@ async function* mockStream(chunks: string[]) {
   }
 }
 
-const { mockExtractName, mockStreamChat } = vi.hoisted(() => ({
-  mockExtractName: vi.fn<() => Promise<string | undefined>>().mockResolvedValue(undefined),
-  mockStreamChat: vi.fn(),
-}));
+const mockExtractName = vi.fn<() => Promise<string | undefined>>().mockResolvedValue(undefined);
+const mockStreamChat = vi.fn();
 
-vi.mock("../plugins/llm/index.js", async () => {
-  const { default: fp } = await import("fastify-plugin");
-  return {
-    default: fp(
-      async (fastify: { decorate: (name: string, value: unknown) => void }) => {
-        fastify.decorate("llm", { extractName: mockExtractName, streamChat: mockStreamChat });
-      },
-      { name: "llm" }
-    ),
-  };
-});
+const mockLlm = { extractName: mockExtractName, streamChat: mockStreamChat };
 
 beforeEach(() => {
-  vi.clearAllMocks();
   mockStreamChat.mockReturnValue(mockStream([]));
+  mockExtractName.mockResolvedValue(undefined);
 });
 
 describe("GET /health", () => {
   it("returns ok", async () => {
-    const app = buildApp();
+    const app = buildApp({ llm: mockLlm, sessionStore: memorySessionStore });
     const response = await app.inject({ method: "GET", url: "/health" });
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({ status: "ok" });
@@ -41,7 +30,7 @@ describe("GET /health", () => {
 
 describe("GET /session", () => {
   it("creates a new session and returns the greeting when no cookie is present", async () => {
-    const app = buildApp();
+    const app = buildApp({ llm: mockLlm, sessionStore: memorySessionStore });
     await app.ready();
 
     const response = await app.inject({ method: "GET", url: "/session" });
@@ -54,7 +43,7 @@ describe("GET /session", () => {
   });
 
   it("returns existing messages for a valid session", async () => {
-    const app = buildApp();
+    const app = buildApp({ llm: mockLlm, sessionStore: memorySessionStore });
     await app.ready();
 
     const sessionId = crypto.randomUUID();
@@ -79,7 +68,7 @@ describe("GET /session", () => {
 
 describe("POST /session/reset", () => {
   it("clears the session and returns the greeting", async () => {
-    const app = buildApp();
+    const app = buildApp({ llm: mockLlm, sessionStore: memorySessionStore });
     await app.ready();
 
     const sessionId = crypto.randomUUID();
@@ -103,7 +92,7 @@ describe("POST /chat", () => {
   it("streams a response for a valid session", async () => {
     mockStreamChat.mockReturnValue(mockStream(["Hello", " world"]));
 
-    const app = buildApp();
+    const app = buildApp({ llm: mockLlm, sessionStore: memorySessionStore });
     await app.ready();
 
     const sessionId = crypto.randomUUID();
@@ -126,7 +115,7 @@ describe("POST /chat", () => {
   });
 
   it("returns 400 when no session cookie is present", async () => {
-    const app = buildApp();
+    const app = buildApp({ llm: mockLlm, sessionStore: memorySessionStore });
     await app.ready();
 
     const response = await app.inject({
@@ -140,7 +129,7 @@ describe("POST /chat", () => {
   });
 
   it("returns 400 for missing message body", async () => {
-    const app = buildApp();
+    const app = buildApp({ llm: mockLlm, sessionStore: memorySessionStore });
     await app.ready();
 
     const response = await app.inject({ method: "POST", url: "/chat", payload: {} });
@@ -150,7 +139,7 @@ describe("POST /chat", () => {
   });
 
   it("returns 400 when message exceeds 1000 characters", async () => {
-    const app = buildApp();
+    const app = buildApp({ llm: mockLlm, sessionStore: memorySessionStore });
     await app.ready();
 
     const response = await app.inject({

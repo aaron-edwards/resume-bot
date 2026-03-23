@@ -1,20 +1,36 @@
 import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import Fastify from "fastify";
-import llmPlugin from "./plugins/llm/index.js";
-import sessionsPlugin from "./plugins/sessions/index.js";
+import type { LLMClient } from "./lib/llm/types.js";
+import type { SessionStore } from "./lib/sessions/types.js";
 import { chatRoutes, sessionRoutes } from "./routes/index.js";
 
-export function buildApp() {
+declare module "fastify" {
+  interface FastifyInstance {
+    llm: LLMClient;
+    sessions: SessionStore;
+  }
+}
+
+export interface AppOptions {
+  llm: LLMClient;
+  sessionStore: SessionStore;
+  corsOrigin?: string;
+  logger?: boolean;
+}
+
+export function buildApp(options: AppOptions) {
+  const corsOrigin = options.corsOrigin ?? "http://localhost:5173";
+
   const app = Fastify({
-    logger: process.env.NODE_ENV !== "test",
+    logger: options.logger ?? false,
   });
 
-  app.register(llmPlugin);
-  app.register(sessionsPlugin);
+  app.decorate("llm", options.llm);
+  app.decorate("sessions", options.sessionStore);
 
   app.register(cors, {
-    origin: process.env.CORS_ORIGIN ?? "http://localhost:5173",
+    origin: corsOrigin,
     credentials: true,
   });
 
@@ -25,7 +41,7 @@ export function buildApp() {
   });
 
   app.register(sessionRoutes);
-  app.register(chatRoutes);
+  app.register(chatRoutes, { corsOrigin });
 
   return app;
 }
