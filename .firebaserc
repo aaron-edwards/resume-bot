@@ -7,6 +7,13 @@
           "aaron-edwards-resumebot"
         ]
       }
+    },
+    "aaron-edwards-resumebot": {
+      "hosting": {
+        "main": [
+          "aaron-edwards-resumebot"
+        ]
+      }
     }
   },
   "etags": {}

@@ -12,8 +12,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      GCP_REGION: australia-southeast1
-      IMAGE: australia-southeast1-docker.pkg.dev/gen-lang-client-0097374271/resume-bot/api
+      GCP_PROJECT: aaron-edwards-resumebot
+      GCP_REGION: us-central1
+      ARTIFACT_REGION: australia-southeast1
+      IMAGE: australia-southeast1-docker.pkg.dev/aaron-edwards-resumebot/resume-bot/api
       CLOUD_RUN_SERVICE: resume-bot-api
 
     steps:
@@ -28,7 +30,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Configure Docker for Artifact Registry
-        run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev --quiet
+        run: gcloud auth configure-docker ${{ env.ARTIFACT_REGION }}-docker.pkg.dev --quiet
 
       - name: Build and push API image
         run: |
@@ -40,8 +42,10 @@ jobs:
           gcloud run deploy ${{ env.CLOUD_RUN_SERVICE }} \
             --image ${{ env.IMAGE }} \
             --region ${{ env.GCP_REGION }} \
+            --project ${{ env.GCP_PROJECT }} \
             --platform managed \
             --allow-unauthenticated \
+            --port 3001 \
             --set-env-vars GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }},CORS_ORIGIN=https://aaron-edwards-resumebot.web.app,SESSION_STORE=firestore
 
   deploy-web:
@@ -50,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      GCP_PROJECT: gen-lang-client-0097374271
+      GCP_PROJECT: aaron-edwards-resumebot
 
     steps:
       - uses: actions/checkout@v4
