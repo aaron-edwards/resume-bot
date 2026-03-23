@@ -13,7 +13,7 @@ jobs:
 
     env:
       GCP_PROJECT: aaron-edwards-resumebot
-      GCP_REGION: us-central1
+      GCP_REGION: australia-southeast1
       ARTIFACT_REGION: australia-southeast1
       IMAGE: australia-southeast1-docker.pkg.dev/aaron-edwards-resumebot/resume-bot/api
       CLOUD_RUN_SERVICE: resume-bot-api
