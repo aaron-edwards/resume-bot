@@ -5,6 +5,13 @@
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
+        "source": "/api/**",
+        "run": {
+          "serviceId": "resume-bot-api",
+          "region": "australia-southeast1"
+        }
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
