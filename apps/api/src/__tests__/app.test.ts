@@ -2,6 +2,7 @@ import type { ChatMessage } from "@repo/types";
 import { vi } from "vitest";
 import { buildApp } from "../app";
 import { memorySessionStore } from "../lib/sessions/memory";
+import { SESSION_COOKIE } from "../routes/consts";
 
 async function* mockStream(chunks: string[]) {
   for (const text of chunks) {
@@ -56,7 +57,7 @@ describe("GET /session", () => {
     const response = await app.inject({
       method: "GET",
       url: "/session",
-      headers: { cookie: `session-id=${sessionId}` },
+      headers: { cookie: `${SESSION_COOKIE}=${sessionId}` },
     });
 
     expect(response.statusCode).toBe(200);
@@ -77,7 +78,7 @@ describe("POST /session/reset", () => {
     const response = await app.inject({
       method: "POST",
       url: "/session/reset",
-      headers: { cookie: `session-id=${sessionId}` },
+      headers: { cookie: `${SESSION_COOKIE}=${sessionId}` },
     });
 
     expect(response.statusCode).toBe(200);
@@ -101,7 +102,7 @@ describe("POST /chat", () => {
     const response = await app.inject({
       method: "POST",
       url: "/chat",
-      headers: { cookie: `session-id=${sessionId}` },
+      headers: { cookie: `${SESSION_COOKIE}=${sessionId}` },
       payload: { message: "Hi" },
     });
 
