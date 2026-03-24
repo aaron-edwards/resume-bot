@@ -10,10 +10,10 @@ function buildContents(messages: ChatMessage[]) {
         parts: [{ text: m.content }],
       })),
     {
-      role: "user",
+      role: "user" as const,
       parts: [
         {
-          text: 'Did the user introduce themselves by name or alter-ego? Return JSON only: { "name": "<name>" } if they did, or {} if they did not.',
+          text: 'The user was asked "what is your name?" before their first message. Did they provide a name or alter-ego in response? Short responses like "Bob", or initials (eg "AE") count. Return JSON only: { "name": "<name>" } if they did, or {} if they did not.',
         },
       ],
     },
