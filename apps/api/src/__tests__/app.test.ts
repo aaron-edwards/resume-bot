@@ -43,6 +43,8 @@ describe("GET /health", () => {
     expect(response.statusCode).toBe(200);
     const body = response.json();
     expect(body).toHaveProperty("buildSha");
+    expect(body).toHaveProperty("buildTimestamp");
+    expect(typeof body.buildTimestamp).toBe("string");
     expect(body).toHaveProperty("dependencies");
     expect(typeof body.buildSha).toBe("string");
     expect(typeof body.dependencies).toBe("object");
