@@ -8,12 +8,13 @@ const healthRoutes: FastifyPluginAsync = async (app) => {
     return process.env.VITE_GIT_SHA ?? "unknown";
   };
 
-  const checkGemini = async (): Promise<{ status: "healthy" | "unhealthy"; latency?: number }> => {
+  const checkGemini = async (): Promise<{ status: "healthy" | "unhealthy"; latency?: number; version?: string }> => {
     const start = Date.now();
     try {
       // This is a lightweight call to verify API key and connectivity
       await app.genai.models.get({ model: "gemini-pro" });
-      return { status: "healthy", latency: Date.now() - start };
+      const version = app.genai.apiVersion;
+      return { status: "healthy", latency: Date.now() - start, version };
     } catch (e) {
       app.log.error(e, "Gemini health check failed");
       return { status: "unhealthy", latency: Date.now() - start };
