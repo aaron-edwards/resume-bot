@@ -1,5 +1,6 @@
 import type { GoogleGenAI } from "@google/genai";
 import type { ChatMessage } from "@repo/types";
+import { NAME_MODEL } from "./models";
 
 function buildContents(messages: ChatMessage[]) {
   return [
@@ -26,7 +27,7 @@ export async function extractName(
 ): Promise<string | undefined> {
   try {
     const response = await genAiClient.models.generateContent({
-      model: "gemini-2.5-flash-lite",
+      model: NAME_MODEL,
       config: {
         systemInstruction:
           "You extract names from conversations. Only return the name the user introduces as their own identity — ignore any names mentioned in the assistant's messages. Return JSON only — no markdown, no explanation.",

@@ -1,4 +1,5 @@
 import type { FastifyPluginAsync } from "fastify";
+import { CHAT_MODEL } from "../lib/llm/models";
 
 const healthRoutes: FastifyPluginAsync = async (app) => {
   const getGitSha = () => {
@@ -15,7 +16,7 @@ const healthRoutes: FastifyPluginAsync = async (app) => {
     const start = Date.now();
     try {
       // This is a lightweight call to verify API key and connectivity
-      await app.genai.models.get({ model: "gemini-pro" });
+      await app.genai.models.get({ model: CHAT_MODEL });
       return { status: "healthy", latency: Date.now() - start };
     } catch (e) {
       app.log.error(e, "Gemini health check failed");
