@@ -64,11 +64,6 @@ export function buildApp(options: AppOptions) {
       healthData.connections.firestore = await checkExternalService("https://firestore.googleapis.com");
     }
 
-    // Check Redis if configured
-    if (process.env.REDIS_URL) {
-      healthData.connections.redis = await checkExternalService(process.env.REDIS_URL);
-    }
-
     return healthData;
   });
 
