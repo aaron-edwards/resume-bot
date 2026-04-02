@@ -5,7 +5,7 @@ const healthRoutes: FastifyPluginAsync = async (app) => {
     if (process.env.NODE_ENV === "development") {
       return "dev";
     }
-    return process.env.VITE_GIT_SHA ?? "unknown";
+    return process.env.GIT_SHA ?? "unknown";
   };
 
   const checkGemini = async (): Promise<{
@@ -46,7 +46,7 @@ const healthRoutes: FastifyPluginAsync = async (app) => {
 
     const response = {
       buildSha: getGitSha(),
-      buildTimestamp: process.env.VITE_BUILD_TIMESTAMP || new Date().toISOString(),
+      buildTimestamp: process.env.BUILD_TIMESTAMP || new Date().toISOString(),
       dependencies: {
         gemini,
         firestore,
