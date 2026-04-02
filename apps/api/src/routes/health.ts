@@ -21,11 +21,11 @@ const healthRoutes: FastifyPluginAsync = async (app) => {
   };
 
   const checkFirestore = async (): Promise<{
-    status: "healthy" | "unhealthy";
+    status: "healthy" | "unhealthy" | "not_configured";
     latency?: number;
   }> => {
     if (!app.firestore) {
-      return { status: "healthy" }; // Not configured, so not unhealthy
+      return { status: "not_configured" }; // Not configured, so not unhealthy
     }
     const start = Date.now();
     try {
