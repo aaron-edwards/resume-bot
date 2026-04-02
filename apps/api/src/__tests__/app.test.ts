@@ -25,7 +25,11 @@ describe("GET /health", () => {
     const app = buildApp({ llm: mockLlm, sessionStore: memorySessionStore });
     const response = await app.inject({ method: "GET", url: "/health" });
     expect(response.statusCode).toBe(200);
-    expect(response.json()).toEqual({ status: "ok" });
+    const body = response.json();
+    expect(body).toHaveProperty("buildSha");
+    expect(body).toHaveProperty("dependencies");
+    expect(typeof body.buildSha).toBe("string");
+    expect(typeof body.dependencies).toBe("object");
   });
 });
 
