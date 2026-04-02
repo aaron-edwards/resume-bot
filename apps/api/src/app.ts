@@ -1,6 +1,8 @@
 import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
+import type { GoogleGenAI } from "@google/genai";
 import Fastify from "fastify";
+import type { Firestore } from "firebase-admin/firestore";
 import type { LLMClient } from "./lib/llm/types";
 import type { SessionStore } from "./lib/sessions/types";
 import healthRoutes from "./routes/health";
@@ -10,12 +12,16 @@ declare module "fastify" {
   interface FastifyInstance {
     llm: LLMClient;
     sessions: SessionStore;
+    genai: GoogleGenAI;
+    firestore?: Firestore;
   }
 }
 
 export interface AppOptions {
   llm: LLMClient;
   sessionStore: SessionStore;
+  genai: GoogleGenAI;
+  firestore?: Firestore;
   corsOrigin?: string;
   logger?: boolean;
   routePrefix?: string;
@@ -30,6 +36,8 @@ export function buildApp(options: AppOptions) {
 
   app.decorate("llm", options.llm);
   app.decorate("sessions", options.sessionStore);
+  app.decorate("genai", options.genai);
+  app.decorate("firestore", options.firestore);
 
   app.register(cors, {
     origin: corsOrigin,

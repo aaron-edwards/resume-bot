@@ -1,3 +1,4 @@
+import type { GoogleGenAI } from "@google/genai";
 import type { ChatMessage } from "@repo/types";
 import type { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -14,13 +15,18 @@ async function* mockStream(chunks: string[]) {
 const mockExtractName = vi.fn<() => Promise<string | undefined>>().mockResolvedValue(undefined);
 const mockStreamChat = vi.fn();
 const mockLlm = { extractName: mockExtractName, streamChat: mockStreamChat };
+const mockGenai = {
+  models: {
+    get: vi.fn(),
+  },
+} as unknown as GoogleGenAI;
 
 // Test setup
 let app: FastifyInstance;
 
 beforeEach(async () => {
   memorySessionStore.clear();
-  app = buildApp({ llm: mockLlm, sessionStore: memorySessionStore });
+  app = buildApp({ llm: mockLlm, genai: mockGenai, sessionStore: memorySessionStore });
   await app.ready();
   mockStreamChat.mockReturnValue(mockStream([]));
   mockExtractName.mockResolvedValue(undefined);
@@ -103,7 +109,11 @@ describe("POST /chat", () => {
   });
 
   it("returns 400 when no session cookie is present", async () => {
-    const response = await app.inject({ method: "POST", url: "/chat", payload: { message: "Hello" } });
+    const response = await app.inject({
+      method: "POST",
+      url: "/chat",
+      payload: { message: "Hello" },
+    });
     expect(response.statusCode).toBe(400);
   });
 
