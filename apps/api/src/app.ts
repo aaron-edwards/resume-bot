@@ -1,4 +1,4 @@
-import { execSync } from "child_process";
+import { execSync } from "node:child_process";
 import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import Fastify from "fastify";
@@ -38,7 +38,9 @@ export function buildApp(options: AppOptions) {
 
   app.register(cookie);
 
-  async function checkExternalService(url: string): Promise<{ status: string; latencyMs?: number }> {
+  async function checkExternalService(
+    url: string
+  ): Promise<{ status: string; latencyMs?: number }> {
     const start = Date.now();
     try {
       await fetch(url, { method: "HEAD", timeout: 5000 });
@@ -56,12 +58,16 @@ export function buildApp(options: AppOptions) {
 
     // Check external services
     if (process.env.GEMINI_API_KEY) {
-      healthData.connections.gemini = await checkExternalService("https://generativelanguage.googleapis.com");
+      healthData.connections.gemini = await checkExternalService(
+        "https://generativelanguage.googleapis.com"
+      );
     }
 
     // Check Firestore (if configured)
     if (process.env.SESSION_STORE === "firestore") {
-      healthData.connections.firestore = await checkExternalService("https://firestore.googleapis.com");
+      healthData.connections.firestore = await checkExternalService(
+        "https://firestore.googleapis.com"
+      );
     }
 
     return healthData;

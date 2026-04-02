@@ -42,7 +42,7 @@ describe("Health Endpoint", () => {
     // Mock environment with a fake URL
     const originalEnv = process.env.SESSION_STORE;
     process.env.SESSION_STORE = "firestore";
-    
+
     const app = buildApp({ llm, sessionStore });
     const response = await app.inject({
       method: "GET",
@@ -50,7 +50,7 @@ describe("Health Endpoint", () => {
     });
 
     expect(response.statusCode).toBe(200);
-    
+
     // Cleanup
     process.env.SESSION_STORE = originalEnv;
   });

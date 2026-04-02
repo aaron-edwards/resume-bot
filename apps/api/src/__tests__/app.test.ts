@@ -21,11 +21,15 @@ beforeEach(() => {
 });
 
 describe("GET /health", () => {
-  it("returns ok", async () => {
+  it("returns ok with git SHA and empty connections", async () => {
     const app = buildApp({ llm: mockLlm, sessionStore: memorySessionStore });
     const response = await app.inject({ method: "GET", url: "/health" });
     expect(response.statusCode).toBe(200);
-    expect(response.json()).toEqual({ status: "ok" });
+    const data = response.json();
+    expect(data.status).toBe("ok");
+    expect(data.gitSha).toBeDefined();
+    expect(data.gitSha.length).toBe(40);
+    expect(data.connections).toEqual({});
   });
 });
 
