@@ -1,17 +1,16 @@
 import "dotenv/config";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, type GoogleGenAI as GoogleGenAIType } from "@google/genai";
+import type { Firestore } from "firebase-admin/firestore";
 import { buildApp } from "./app";
 import { streamChat } from "./lib/llm/chat";
 import { extractName } from "./lib/llm/extractName";
-import { firestoreSessionStore } from "./lib/sessions/firestore";
+import { firestoreSessionStore, getDb } from "./lib/sessions/firestore";
 import { memorySessionStore } from "./lib/sessions/memory";
 
-if (!process.env.GEMINI_API_KEY) {
-  console.error("GEMINI_API_KEY environment variable is required");
-  process.exit(1);
-}
+// ... (rest of the file remains the same until buildApp call)
 
 const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const firestore = process.env.SESSION_STORE === "firestore" ? getDb() : undefined;
 const sessionStore =
   process.env.SESSION_STORE === "firestore" ? firestoreSessionStore : memorySessionStore;
 
@@ -20,10 +19,11 @@ const app = buildApp({
     extractName: (messages) => extractName(genai, messages),
     streamChat: (messages, userName) => streamChat(genai, messages, userName),
   },
+  genai: genai as GoogleGenAIType,
+  firestore,
   sessionStore,
   corsOrigin: process.env.CORS_ORIGIN,
   logger: process.env.NODE_ENV !== "test",
-  routePrefix: "/api",
 });
 
 app.log.info(

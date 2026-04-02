@@ -5,7 +5,7 @@ import type { SessionStore } from "./types";
 
 let db: Firestore | null = null;
 
-function getDb(): Firestore {
+export function getDb(): Firestore {
   if (!db) {
     initializeApp();
     db = getFirestore();
