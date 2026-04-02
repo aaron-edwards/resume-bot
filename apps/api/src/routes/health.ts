@@ -16,11 +16,16 @@ const healthRoutes: FastifyPluginAsync = async (app) => {
         });
 
   const checkDependency = async (
-    url: string
+    url: string,
+    apiKey?: string,
   ): Promise<{ status: "healthy" | "unhealthy"; latency?: number }> => {
     const start = Date.now();
     try {
-      const response = await fetch(url, { method: "HEAD", signal: AbortSignal.timeout(5000) });
+      const headers: Record<string, string> = {};
+      if (apiKey) {
+        headers["x-goog-api-key"] = apiKey;
+      }
+      const response = await fetch(url, { method: "GET", signal: AbortSignal.timeout(5000), headers });
       if (!response.ok) throw new Error(`Dependency check failed with status ${response.status}`);
       return { status: "healthy", latency: Date.now() - start };
     } catch (e) {
@@ -33,7 +38,11 @@ const healthRoutes: FastifyPluginAsync = async (app) => {
     const gitSha = await getGitSha();
 
     const [gemini, firestore] = await Promise.all([
-      checkDependency("https://generativelanguage.googleapis.com"),
+      checkDependency(
+        "https://generativelanguage.googleapis.com/v1beta/models",
+        process.env.GEMINI_API_KEY,
+      ),
+      // Firestore health check remains a HEAD request to the base URL
       checkDependency("https://firestore.googleapis.com"),
     ]);
 
