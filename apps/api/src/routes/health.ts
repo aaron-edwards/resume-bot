@@ -15,7 +15,7 @@ const healthRoutes: FastifyPluginAsync = async (app) => {
     const start = Date.now();
     try {
       // This is a lightweight call to verify API key and connectivity
-      await app.genai.models.get({ model: "gemini-pro" });
+      await app.genai.models.get({ model: "gemini-2.5-flash" });
       return { status: "healthy", latency: Date.now() - start };
     } catch (e) {
       app.log.error(e, "Gemini health check failed");
