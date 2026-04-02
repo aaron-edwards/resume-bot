@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { GoogleGenAI } from "@google/genai";
 import type { ChatMessage } from "@repo/types";
+import { CHAT_MODEL } from "./models";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // In the tsdown bundle __dirname = dist/; in tests __dirname = src/lib/llm/
@@ -40,7 +41,7 @@ export async function* streamChat(
   userName?: string
 ): AsyncGenerator<string> {
   const stream = await genAiClient.models.generateContentStream({
-    model: "gemini-2.5-flash",
+    model: CHAT_MODEL,
     config: { systemInstruction: buildSystemPrompt(userName) },
     contents: messages.slice(-MAX_HISTORY_MESSAGES).map((m) => ({
       role: m.role === "assistant" ? "model" : "user",
