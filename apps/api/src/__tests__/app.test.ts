@@ -26,7 +26,7 @@ let app: FastifyInstance;
 
 beforeEach(async () => {
   memorySessionStore.clear();
-  app = buildApp({ llm: mockLlm, genai: mockGenai, sessionStore: memorySessionStore });
+  app = buildApp({ llm: mockLlm, genai: mockGenai, sessionStore: memorySessionStore, routePrefix: "" });
   await app.ready();
   mockStreamChat.mockReturnValue(mockStream([]));
   mockExtractName.mockResolvedValue(undefined);

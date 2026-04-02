@@ -7,8 +7,6 @@ import { extractName } from "./lib/llm/extractName";
 import { firestoreSessionStore, getDb } from "./lib/sessions/firestore";
 import { memorySessionStore } from "./lib/sessions/memory";
 
-// ... (rest of the file remains the same until buildApp call)
-
 const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const firestore = process.env.SESSION_STORE === "firestore" ? getDb() : undefined;
 const sessionStore =
@@ -24,6 +22,7 @@ const app = buildApp({
   sessionStore,
   corsOrigin: process.env.CORS_ORIGIN,
   logger: process.env.NODE_ENV !== "test",
+  routePrefix: "/api",
 });
 
 app.log.info(
