@@ -21,6 +21,10 @@ RUN pnpm deploy --filter api --prod /prod/api
 FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ARG GIT_SHA=unknown
+ARG BUILD_TIMESTAMP=unknown
+ENV GIT_SHA=$GIT_SHA
+ENV BUILD_TIMESTAMP=$BUILD_TIMESTAMP
 COPY --from=deployer /prod/api ./
 COPY --from=builder /app/apps/api/src/data ./dist/data
 EXPOSE 3001
