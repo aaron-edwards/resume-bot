@@ -8,7 +8,11 @@ const healthRoutes: FastifyPluginAsync = async (app) => {
     return process.env.VITE_GIT_SHA ?? "unknown";
   };
 
-  const checkGemini = async (): Promise<{ status: "healthy" | "unhealthy"; latency?: number; version?: string }> => {
+  const checkGemini = async (): Promise<{
+    status: "healthy" | "unhealthy";
+    latency?: number;
+    version?: string;
+  }> => {
     const start = Date.now();
     try {
       // This is a lightweight call to verify API key and connectivity
