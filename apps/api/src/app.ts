@@ -24,7 +24,7 @@ export interface AppOptions {
   firestore?: Firestore;
   corsOrigin?: string;
   logger?: boolean;
-  routePrefix?: string;
+  routePrefix: string;
 }
 
 export function buildApp(options: AppOptions) {
@@ -46,10 +46,10 @@ export function buildApp(options: AppOptions) {
 
   app.register(cookie);
 
-  const prefix = options.routePrefix ?? "";
+  const prefix = options.routePrefix;
   app.register(sessionRoutes, { prefix });
   app.register(chatRoutes, { prefix, corsOrigin });
-  app.register(healthRoutes);
+  app.register(healthRoutes, { prefix });
 
   return app;
 }
