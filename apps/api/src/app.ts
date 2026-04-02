@@ -1,3 +1,4 @@
+import { execSync } from "child_process";
 import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import Fastify from "fastify";
@@ -49,15 +50,7 @@ export function buildApp(options: AppOptions) {
   }
 
   app.get("/health", async () => {
-    const gitSha = await new Promise((resolve, reject) => {
-      const { execSync } = require("child_process");
-      try {
-        const sha = execSync("git rev-parse HEAD", { cwd: process.cwd() });
-        resolve(sha.toString().trim());
-      } catch (err) {
-        reject(err);
-      }
-    });
+    const gitSha = execSync("git rev-parse HEAD", { cwd: process.cwd() }).toString().trim();
 
     const healthData = { status: "ok", gitSha, connections: {} };
 
