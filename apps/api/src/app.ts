@@ -3,6 +3,7 @@ import cors from "@fastify/cors";
 import Fastify from "fastify";
 import type { LLMClient } from "./lib/llm/types";
 import type { SessionStore } from "./lib/sessions/types";
+import healthRoutes from "./routes/health";
 import { chatRoutes, sessionRoutes } from "./routes/index";
 
 declare module "fastify" {
@@ -37,52 +38,10 @@ export function buildApp(options: AppOptions) {
 
   app.register(cookie);
 
-  app.get("/health", async (_req, reply) => {
-    const { exec } = await import("node:child_process");
-
-    const getGitSha = () =>
-      new Promise<string>((resolve, reject) => {
-        exec("git rev-parse HEAD", (error, stdout) => {
-          if (error) {
-            return reject(error);
-          }
-          resolve(stdout.toString().trim());
-        });
-      });
-
-    const checkDependency = async (
-      url: string
-    ): Promise<{ status: "healthy" | "unhealthy"; latency?: number }> => {
-      const startTime = Date.now();
-      try {
-        const response = await fetch(url, { method: "HEAD", signal: AbortSignal.timeout(5000) });
-        if (!response.ok) throw new Error("unhealthy");
-        return { status: "healthy", latency: Date.now() - startTime };
-      } catch (e) {
-        return { status: "unhealthy" };
-      }
-    };
-
-    const [gitSha, gemini, firestore] = await Promise.all([
-      getGitSha().catch(() => "unknown"),
-      checkDependency("https://generativelanguage.googleapis.com"),
-      checkDependency("https://firestore.googleapis.com"),
-    ]);
-
-    const response = {
-      buildSha: gitSha,
-      dependencies: {
-        gemini,
-        firestore,
-      },
-    };
-
-    return reply.send(response);
-  });
-
   const prefix = options.routePrefix ?? "";
   app.register(sessionRoutes, { prefix });
   app.register(chatRoutes, { prefix, corsOrigin });
+  app.register(healthRoutes);
 
   return app;
 }

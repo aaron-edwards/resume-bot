@@ -11,7 +11,11 @@ type Session = {
 
 const store = new Map<string, Session>();
 
-export const memorySessionStore: SessionStore = {
+export const memorySessionStore: SessionStore & { clear: () => void } = {
+  clear() {
+    store.clear();
+  },
+
   async getSession(sessionId) {
     const session = store.get(sessionId);
     return { messages: session?.messages ?? [], userName: session?.userName, ip: session?.ip };
