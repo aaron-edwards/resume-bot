@@ -18,6 +18,7 @@ const healthRoutes: FastifyPluginAsync = async (app) => {
   const checkDependency = async (
     url: string,
     apiKey?: string,
+    accept404 = false,
   ): Promise<{ status: "healthy" | "unhealthy"; latency?: number }> => {
     const start = Date.now();
     try {
@@ -26,7 +27,9 @@ const healthRoutes: FastifyPluginAsync = async (app) => {
         headers["x-goog-api-key"] = apiKey;
       }
       const response = await fetch(url, { method: "GET", signal: AbortSignal.timeout(5000), headers });
-      if (!response.ok) throw new Error(`Dependency check failed with status ${response.status}`);
+      if (!response.ok && !(accept404 && response.status === 404)) {
+        throw new Error(`Dependency check failed with status ${response.status}`);
+      }
       return { status: "healthy", latency: Date.now() - start };
     } catch (e) {
       app.log.error(e, `Failed to check dependency: ${url}`);
@@ -42,8 +45,8 @@ const healthRoutes: FastifyPluginAsync = async (app) => {
         "https://generativelanguage.googleapis.com/v1beta/models",
         process.env.GEMINI_API_KEY,
       ),
-      // Firestore health check remains a HEAD request to the base URL
-      checkDependency("https://firestore.googleapis.com"),
+      // Firestore health check: accept a 404 as "healthy" because the service is up
+      checkDependency("https://firestore.googleapis.com", undefined, true),
     ]);
 
     const response = {
