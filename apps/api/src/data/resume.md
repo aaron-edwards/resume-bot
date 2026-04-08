@@ -14,7 +14,7 @@ Senior full-stack engineer with 12+ years building scalable platforms. Joined Bl
 
 ## Technical Skills
 
-**Languages:** Kotlin, Java, TypeScript, JavaScript, Python, SQL
+**Languages:** Kotlin, Java, TypeScript, JavaScript, Ruby, SQL
 
 **Frontend:** React, Next.js, GraphQL
 
