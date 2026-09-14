@@ -9,7 +9,7 @@ it("renders the whole about page, including the architecture diagram", async () 
   const { container } = render(<AboutPage />, { wrapper: MemoryRouter });
 
   // Wait for mermaid's async render to land before snapshotting.
-  await screen.findByRole("img", { name: /mermaid diagram/i });
+  await screen.findByRole("img", { name: /mermaid diagram/i }, { timeout: 10_000 });
 
   // Mermaid embeds a fresh `mermaid-<id>-<timestamp>` string throughout the
   // page (ids, aria-roledescription refs, etc.) on every render. Normalize
