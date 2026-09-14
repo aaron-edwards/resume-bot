@@ -98,7 +98,7 @@ export function AboutPage() {
       <Section title="Architecture Diagrams (Some boxes with lines between them)">
         <Mermaid
           chart={ARCHITECTURE_DIAGRAM}
-          config={{ theme: "neutral", fontFamily: "inherit" }}
+          config={{ theme: "neutral", fontFamily: "inherit", flowchart: { htmlLabels: false } }}
           className="rounded-lg border bg-background p-4"
         />
       </Section>
