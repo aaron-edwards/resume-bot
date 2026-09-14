@@ -20,16 +20,25 @@ Senior full-stack engineer with 12+ years building scalable platforms. Joined Bl
 
 **Backend:** REST APIs, Kafka, gRPC/Protobuf, GraphQL, Relational & NoSQL databases
 
-**Cloud & Infrastructure:** AWS (Aurora, EC2, Connect, S3, SQS, DynamoDB), Terraform, Docker
+**Cloud & Infrastructure:** AWS (Aurora, EC2, Connect, S3, SQS, SNS, DynamoDB, Lambda), Terraform, Docker
 
 **Practices:** AI-Assisted Workflows, Agile Methodologies, Pair Programming, Test-Driven Development, CI/CD, Microservices, Production Observability & Ownership
 
 ## Professional Experience
 
-### Block (Cash App) — June 2020 to February 2026
-**Senior Software Engineer (L6)**
+### Seek — May 2026 to Current
+**Senior Software Engineer (contractor)**
 
-Block is a global fintech company serving 55M+ users across products including Cash App, Square, and Afterpay. Part of the Cash App Support Engineering team, leading architectural design decisions and building the systems that power customer support across multiple channels.
+SEEK is Australia's leading online employment marketplace, operating across APAC (Australia, NZ, Hong Kong, Indonesia, Malaysia, Philippines, Singapore, Thailand) with 3,200+ employees and 120M+ candidate profiles.
+
+- Built a solution to synchronise candidate profile updates to external ATS providers, processing ~500,000 updates per day
+- Managed and built the infrastructure-as-code for the AWS-based solution (primarily Lambda, DynamoDB, SQS & SNS)
+- Set up Datadog & PagerDuty based monitoring and alerting for the project
+
+### Block (Cash App) — June 2020 to March 2026
+**Senior Software Engineer (2020–2022) → Staff Software Engineer (2022–2026)**
+
+Block is a global fintech company serving 55M+ users across products including Cash App, Square, and Afterpay. One of the initial members of the Cash App Support Engineering team, leading architectural design decisions and building the systems that power customer support across multiple channels.
 
 **Live Chat Platform**
 - Architected and implemented Kotlin backend services powering real-time support messaging
