@@ -6,6 +6,7 @@
     "./alert-dialog": "./src/components/ui/alert-dialog.tsx",
     "./button": "./src/components/ui/button.tsx",
     "./textarea": "./src/components/ui/textarea.tsx",
+    "./mermaid": "./src/components/mermaidcn/mermaid.tsx",
     "./utils": "./src/lib/utils.ts"
   },
   "dependencies": {
@@ -14,6 +15,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.511.0",
+    "mermaid": "^12.0.0",
     "tailwind-merge": "^3.3.0"
   },
   "devDependencies": {

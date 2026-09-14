@@ -3,12 +3,17 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { createElement } from "react";
+import { MemoryRouter } from "react-router-dom";
 import App from "../App";
 import { GREETING, mockChatResponse, server } from "../test/server";
 
 function wrapper({ children }: { children: React.ReactNode }) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return createElement(QueryClientProvider, { client: queryClient }, children);
+  return createElement(
+    QueryClientProvider,
+    { client: queryClient },
+    createElement(MemoryRouter, null, children)
+  );
 }
 
 function renderApp() {
@@ -67,4 +72,17 @@ it("error path: send message → see error → reset clears it", async () => {
   );
   await screen.findByText(GREETING[0].content);
   expect(screen.queryByText(/something went wrong/i)).not.toBeInTheDocument();
+});
+
+it("navigates to the about page and back", async () => {
+  renderApp();
+  await screen.findByText(GREETING[0].content);
+
+  await userEvent.click(screen.getByRole("link", { name: /about/i }));
+  expect(screen.getByText(/what is this thing/i)).toBeInTheDocument();
+
+  const backLinks = screen.getAllByRole("link", { name: /back to chat/i });
+  await userEvent.click(backLinks[backLinks.length - 1]);
+  expect(screen.queryByText(/what is this thing/i)).not.toBeInTheDocument();
+  await screen.findByText(GREETING[0].content);
 });

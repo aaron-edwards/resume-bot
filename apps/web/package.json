@@ -24,6 +24,7 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.18.3",
     "remark-gfm": "^4.0.1",
     "tailwindcss": "^4.2.2"
   },
@@ -37,6 +38,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "happy-dom": "^20.8.4",
+    "jsdom": "^30.0.1",
     "msw": "^2.12.13",
     "typescript": "~5.9.3",
     "vite": "^8.0.1",

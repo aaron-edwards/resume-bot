@@ -1,0 +1,1370 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renders the whole about page, including the architecture diagram 1`] = `
+<div>
+  <div
+    class="flex flex-col flex-1 overflow-y-auto max-w-2xl w-full mx-auto p-4 gap-6"
+  >
+    <a
+      class="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors self-start"
+      data-discover="true"
+      href="/"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-arrow-left h-4 w-4"
+        fill="none"
+        height="24"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m12 19-7-7 7-7"
+        />
+        <path
+          d="M19 12H5"
+        />
+      </svg>
+      Back to chat
+    </a>
+    <section
+      class="flex flex-col gap-2"
+    >
+      <h2
+        class="text-base font-semibold"
+      >
+        What is this thing?
+      </h2>
+      <div
+        class="text-sm text-muted-foreground flex flex-col gap-2"
+      >
+        <p>
+          Nobody actually reads resumes cover to cover, so Aaron built one you can interrogate instead. Ask it whatever you'd normally ask a candidate — it'll answer in real time, grounded in his actual work history, and (mostly) won't make anything up.
+        </p>
+        <p>
+          Is it useful? Probably not.
+          <br />
+          Was it fun to make? Yes, yes it was.
+        </p>
+      </div>
+    </section>
+    <section
+      class="flex flex-col gap-2"
+    >
+      <h2
+        class="text-base font-semibold"
+      >
+        How it works
+      </h2>
+      <div
+        class="text-sm text-muted-foreground flex flex-col gap-2"
+      >
+        <p>
+          Aaron's resume gets shoved into Google's Gemini 2.5 Flash as a system prompt, then the model is told, sternly, to stick to the facts and not wander off into being a general-purpose chatbot.
+        </p>
+        <ol
+          class="list-decimal list-inside flex flex-col gap-1"
+        >
+          <li>
+            Your browser opens a session and grabs any history you left behind
+          </li>
+          <li>
+            Your question hits the API, which streams the model's answer back word by word
+          </li>
+          <li>
+            That answer renders live as markdown, typing-indicator and all
+          </li>
+          <li>
+            The whole conversation gets saved, so you can walk away and pick it back up
+          </li>
+        </ol>
+      </div>
+    </section>
+    <section
+      class="flex flex-col gap-2"
+    >
+      <h2
+        class="text-base font-semibold"
+      >
+        Architecture (the fun kind)
+      </h2>
+      <div
+        class="text-sm text-muted-foreground flex flex-col gap-2"
+      >
+        <p>
+          A tidy little monorepo, three parts pretending to be one app:
+        </p>
+        <ul
+          class="list-disc list-inside flex flex-col gap-1"
+        >
+          <li>
+            <span
+              class="font-medium text-foreground"
+            >
+              apps/web
+            </span>
+             — the chat UI you're looking at, living on Firebase Hosting
+          </li>
+          <li>
+            <span
+              class="font-medium text-foreground"
+            >
+              apps/api
+            </span>
+             — the Fastify brain, running on Google Cloud Run
+          </li>
+          <li>
+            <span
+              class="font-medium text-foreground"
+            >
+              packages/types
+            </span>
+             — the shared TypeScript contract keeping the other two honest
+          </li>
+          <li>
+            <span
+              class="font-medium text-foreground"
+            >
+              packages/ui
+            </span>
+             — the shared, Shadcn-flavoured components
+          </li>
+        </ul>
+        <p>
+          A cookie remembers who you are and Firestore remembers what you said, so no login and no amnesia between visits.
+        </p>
+      </div>
+    </section>
+    <section
+      class="flex flex-col gap-2"
+    >
+      <h2
+        class="text-base font-semibold"
+      >
+        Architecture Diagrams (Some boxes with lines between them)
+      </h2>
+      <div
+        class="text-sm text-muted-foreground flex flex-col gap-2"
+      >
+        <div
+          class="relative w-full min-h-[100px] rounded-lg border bg-background p-4"
+        >
+          <div
+            aria-label="Mermaid diagram"
+            class="flex items-center justify-center w-full h-full overflow-auto animate-in fade-in duration-300 [&_svg]:max-w-full [&_svg]:h-auto"
+            role="img"
+          >
+            <svg
+              aria-roledescription="flowchart-v2"
+              class="flowchart"
+              id="mermaid-ID"
+              role="graphics-document document"
+              style="max-width: 43948px;"
+              viewBox="-8 -8 43948 32"
+              width="100%"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+            >
+              <style>
+                #mermaid-ID{font-family:inherit;font-size:16px;fill:#000000;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#mermaid-ID .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#mermaid-ID .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#mermaid-ID .error-icon{fill:#552222;}#mermaid-ID .error-text{fill:#552222;stroke:#552222;}#mermaid-ID .edge-thickness-normal{stroke-width:1px;}#mermaid-ID .edge-thickness-thick{stroke-width:3.5px;}#mermaid-ID .edge-pattern-solid{stroke-dasharray:0;}#mermaid-ID .edge-thickness-invisible{stroke-width:0;fill:none;}#mermaid-ID .edge-pattern-dashed{stroke-dasharray:3;}#mermaid-ID .edge-pattern-dotted{stroke-dasharray:2;}#mermaid-ID .marker{fill:#666;stroke:#666;}#mermaid-ID .marker.cross{stroke:#666;}#mermaid-ID svg{font-family:inherit;font-size:16px;}#mermaid-ID p{margin:0;}#mermaid-ID .label{font-family:inherit;color:#000000;}#mermaid-ID .cluster-label text{fill:#333;}#mermaid-ID .cluster-label span{color:#333;}#mermaid-ID .cluster-label span p{background-color:transparent;}#mermaid-ID .label text,#mermaid-ID span{fill:#000000;color:#000000;}#mermaid-ID .node rect,#mermaid-ID .node circle,#mermaid-ID .node ellipse,#mermaid-ID .node polygon,#mermaid-ID .node path{fill:#eee;stroke:#999;stroke-width:1px;}#mermaid-ID .rough-node .label text,#mermaid-ID .node .label text,#mermaid-ID .image-shape .label,#mermaid-ID .icon-shape .label{text-anchor:middle;}#mermaid-ID .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mermaid-ID .rough-node .label,#mermaid-ID .node .label,#mermaid-ID .image-shape .label,#mermaid-ID .icon-shape .label{text-align:center;}#mermaid-ID .node.clickable{cursor:pointer;}#mermaid-ID .root .anchor path{fill:#666!important;stroke-width:0;stroke:#666;}#mermaid-ID .arrowheadPath{fill:#333333;}#mermaid-ID .edgePaths .path{stroke:#666;stroke-width:1px;}#mermaid-ID .flowchart-link{stroke:#666;fill:none;}#mermaid-ID .edgeLabel{background-color:white;text-align:center;}#mermaid-ID .edgeLabel p{background-color:white;}#mermaid-ID .edgeLabel rect{opacity:0.5;background-color:white;fill:white;}#mermaid-ID .labelBkg{background-color:rgba(255, 255, 255, 0.5);}#mermaid-ID .cluster rect{fill:hsl(0, 0%, 98.9215686275%);stroke:#707070;stroke-width:1px;}#mermaid-ID .cluster text{fill:#333;}#mermaid-ID .cluster span{color:#333;}#mermaid-ID .node .collapsed-indicator{fill:#707070;stroke:none;opacity:0.6;}#mermaid-ID .node .collapsed-separator{stroke:#707070;stroke-width:0.75px;}#mermaid-ID div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:inherit;font-size:12px;background:hsl(-160, 0%, 93.3333333333%);border:1px solid #707070;border-radius:2px;pointer-events:none;z-index:100;}#mermaid-ID .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#000000;}#mermaid-ID rect.text{fill:none;stroke-width:0;}#mermaid-ID .icon-shape,#mermaid-ID .image-shape{background-color:white;text-align:center;}#mermaid-ID .icon-shape p,#mermaid-ID .image-shape p{background-color:white;padding:2px;}#mermaid-ID .icon-shape .label rect,#mermaid-ID .image-shape .label rect{opacity:0.5;background-color:white;fill:white;}#mermaid-ID .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#mermaid-ID .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#mermaid-ID .node .neo-node{stroke:#999;}#mermaid-ID [data-look="neo"].node rect,#mermaid-ID [data-look="neo"].cluster rect,#mermaid-ID [data-look="neo"].node polygon{stroke:url(#mermaid-ID-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mermaid-ID [data-look="neo"].swimlane.cluster rect{filter:none;}#mermaid-ID [data-look="neo"].node path{stroke:url(#mermaid-ID-gradient);stroke-width:1px;}#mermaid-ID [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mermaid-ID [data-look="neo"].node .neo-line path{stroke:#999;filter:none;}#mermaid-ID [data-look="neo"].node circle{stroke:url(#mermaid-ID-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mermaid-ID [data-look="neo"].node circle .state-start{fill:#000000;}#mermaid-ID [data-look="neo"].icon-shape .icon{fill:url(#mermaid-ID-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mermaid-ID [data-look="neo"].icon-shape .icon-neo path{stroke:url(#mermaid-ID-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mermaid-ID :root{--mermaid-font-family:inherit;}
+              </style>
+              <g>
+                <marker
+                  class="marker flowchart-v2"
+                  id="mermaid-ID_flowchart-v2-pointEnd"
+                  markerHeight="8"
+                  markerUnits="userSpaceOnUse"
+                  markerWidth="8"
+                  orient="auto"
+                  refX="5"
+                  refY="5"
+                  viewBox="0 0 10 10"
+                >
+                  <path
+                    class="arrowMarkerPath"
+                    d="M 0 0 L 10 5 L 0 10 z"
+                    style="stroke-width: 1; stroke-dasharray: 1,0;"
+                  />
+                </marker>
+                <marker
+                  class="marker flowchart-v2"
+                  id="mermaid-ID_flowchart-v2-pointStart"
+                  markerHeight="8"
+                  markerUnits="userSpaceOnUse"
+                  markerWidth="8"
+                  orient="auto"
+                  refX="4.5"
+                  refY="5"
+                  viewBox="0 0 10 10"
+                >
+                  <path
+                    class="arrowMarkerPath"
+                    d="M 0 5 L 10 10 L 10 0 z"
+                    style="stroke-width: 1; stroke-dasharray: 1,0;"
+                  />
+                </marker>
+                <marker
+                  class="marker flowchart-v2"
+                  id="mermaid-ID_flowchart-v2-pointEnd-margin"
+                  markerHeight="14"
+                  markerUnits="userSpaceOnUse"
+                  markerWidth="10.5"
+                  orient="auto"
+                  refX="11.5"
+                  refY="7"
+                  viewBox="0 0 11.5 14"
+                >
+                  <path
+                    class="arrowMarkerPath"
+                    d="M 0 0 L 11.5 7 L 0 14 z"
+                    style="stroke-width: 0; stroke-dasharray: 1,0;"
+                  />
+                </marker>
+                <marker
+                  class="marker flowchart-v2"
+                  id="mermaid-ID_flowchart-v2-pointStart-margin"
+                  markerHeight="14"
+                  markerUnits="userSpaceOnUse"
+                  markerWidth="11.5"
+                  orient="auto"
+                  refX="1"
+                  refY="7"
+                  viewBox="0 0 11.5 14"
+                >
+                  <polygon
+                    class="arrowMarkerPath"
+                    points="0,7 11.5,14 11.5,0"
+                    style="stroke-width: 0; stroke-dasharray: 1,0;"
+                  />
+                </marker>
+                <marker
+                  class="marker flowchart-v2"
+                  id="mermaid-ID_flowchart-v2-circleEnd"
+                  markerHeight="11"
+                  markerUnits="userSpaceOnUse"
+                  markerWidth="11"
+                  orient="auto"
+                  refX="11"
+                  refY="5"
+                  viewBox="0 0 10 10"
+                >
+                  <circle
+                    class="arrowMarkerPath"
+                    cx="5"
+                    cy="5"
+                    r="5"
+                    style="stroke-width: 1; stroke-dasharray: 1,0;"
+                  />
+                </marker>
+                <marker
+                  class="marker flowchart-v2"
+                  id="mermaid-ID_flowchart-v2-circleStart"
+                  markerHeight="11"
+                  markerUnits="userSpaceOnUse"
+                  markerWidth="11"
+                  orient="auto"
+                  refX="-1"
+                  refY="5"
+                  viewBox="0 0 10 10"
+                >
+                  <circle
+                    class="arrowMarkerPath"
+                    cx="5"
+                    cy="5"
+                    r="5"
+                    style="stroke-width: 1; stroke-dasharray: 1,0;"
+                  />
+                </marker>
+                <marker
+                  class="marker flowchart-v2"
+                  id="mermaid-ID_flowchart-v2-circleEnd-margin"
+                  markerHeight="14"
+                  markerUnits="userSpaceOnUse"
+                  markerWidth="14"
+                  orient="auto"
+                  refX="12.25"
+                  refY="5"
+                  viewBox="0 0 10 10"
+                >
+                  <circle
+                    class="arrowMarkerPath"
+                    cx="5"
+                    cy="5"
+                    r="5"
+                    style="stroke-width: 0; stroke-dasharray: 1,0;"
+                  />
+                </marker>
+                <marker
+                  class="marker flowchart-v2"
+                  id="mermaid-ID_flowchart-v2-circleStart-margin"
+                  markerHeight="14"
+                  markerUnits="userSpaceOnUse"
+                  markerWidth="14"
+                  orient="auto"
+                  refX="-2"
+                  refY="5"
+                  viewBox="0 0 10 10"
+                >
+                  <circle
+                    class="arrowMarkerPath"
+                    cx="5"
+                    cy="5"
+                    r="5"
+                    style="stroke-width: 0; stroke-dasharray: 1,0;"
+                  />
+                </marker>
+                <marker
+                  class="marker cross flowchart-v2"
+                  id="mermaid-ID_flowchart-v2-crossEnd"
+                  markerHeight="11"
+                  markerUnits="userSpaceOnUse"
+                  markerWidth="11"
+                  orient="auto"
+                  refX="12"
+                  refY="5.2"
+                  viewBox="0 0 11 11"
+                >
+                  <path
+                    class="arrowMarkerPath"
+                    d="M 1,1 l 9,9 M 10,1 l -9,9"
+                    style="stroke-width: 2; stroke-dasharray: 1,0;"
+                  />
+                </marker>
+                <marker
+                  class="marker cross flowchart-v2"
+                  id="mermaid-ID_flowchart-v2-crossStart"
+                  markerHeight="11"
+                  markerUnits="userSpaceOnUse"
+                  markerWidth="11"
+                  orient="auto"
+                  refX="-1"
+                  refY="5.2"
+                  viewBox="0 0 11 11"
+                >
+                  <path
+                    class="arrowMarkerPath"
+                    d="M 1,1 l 9,9 M 10,1 l -9,9"
+                    style="stroke-width: 2; stroke-dasharray: 1,0;"
+                  />
+                </marker>
+                <marker
+                  class="marker cross flowchart-v2"
+                  id="mermaid-ID_flowchart-v2-crossEnd-margin"
+                  markerHeight="12"
+                  markerUnits="userSpaceOnUse"
+                  markerWidth="12"
+                  orient="auto"
+                  refX="17.7"
+                  refY="7.5"
+                  viewBox="0 0 15 15"
+                >
+                  <path
+                    class="arrowMarkerPath"
+                    d="M 1,1 L 14,14 M 1,14 L 14,1"
+                    style="stroke-width: 2.5;"
+                  />
+                </marker>
+                <marker
+                  class="marker cross flowchart-v2"
+                  id="mermaid-ID_flowchart-v2-crossStart-margin"
+                  markerHeight="12"
+                  markerUnits="userSpaceOnUse"
+                  markerWidth="12"
+                  orient="auto"
+                  refX="-3.5"
+                  refY="7.5"
+                  viewBox="0 0 15 15"
+                >
+                  <path
+                    class="arrowMarkerPath"
+                    d="M 1,1 L 14,14 M 1,14 L 14,1"
+                    style="stroke-width: 2.5; stroke-dasharray: 1,0;"
+                  />
+                </marker>
+                <g
+                  class="root"
+                >
+                  <g
+                    class="clusters"
+                  />
+                  <g
+                    class="edges edgePaths"
+                  >
+                    <path
+                      class=" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link"
+                      d="M757.75,388L757.75,375.0710678118655Q757.75,368 764.8210678118655,368L803.6789321881345,368Q810.75,368 810.75,360.9289321881345L810.75,319.0710678118655Q810.75,312 803.6789321881345,312L790.4877344785323,312Q783.4166666666667,312 783.4166666666667,304.9289321881345L783.4166666666667,296"
+                      data-edge="true"
+                      data-et="edge"
+                      data-id="L_User_Web_0"
+                      data-look="classic"
+                      data-points="W3sieCI6NzU3Ljc1LCJ5IjozODh9LHsieCI6NzU3Ljc1LCJ5IjozNjh9LHsieCI6ODEwLjc1LCJ5IjozNjh9LHsieCI6ODEwLjc1LCJ5IjozMTJ9LHsieCI6NzgzLjQxNjY2NjY2NjY2NjcsInkiOjMxMn0seyJ4Ijo3ODMuNDE2NjY2NjY2NjY2NywieSI6MjkyfV0="
+                      id="mermaid-ID-L_User_Web_0"
+                      marker-end="url(#mermaid-ID_flowchart-v2-pointEnd)"
+                      style=";"
+                    />
+                    <path
+                      class=" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link"
+                      d="M744.75,276L744.75,187.07106781186548Q744.75,180 737.6789321881345,180L528.0353535261513,180Q520.9642857142858,180 520.9642857142858,172.92893218813452L520.9642857142858,144"
+                      data-edge="true"
+                      data-et="edge"
+                      data-id="L_Web_API_0"
+                      data-look="classic"
+                      data-points="W3sieCI6NzQ0Ljc1LCJ5IjoyNzZ9LHsieCI6NzQ0Ljc1LCJ5IjoxODB9LHsieCI6NTIwLjk2NDI4NTcxNDI4NTgsInkiOjE4MH0seyJ4Ijo1MjAuOTY0Mjg1NzE0Mjg1OCwieSI6MTQwfV0="
+                      id="mermaid-ID-L_Web_API_0"
+                      marker-end="url(#mermaid-ID_flowchart-v2-pointEnd)"
+                      style=";"
+                    />
+                    <path
+                      class=" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link"
+                      d="M802.75,276L802.75,263.0710678118655Q802.75,256 809.8210678118655,256L904.6789321881345,256Q911.75,256 911.75,248.92893218813452L911.75,167.07106781186548Q911.75,160 904.6789321881345,160L548.1782106690084,160Q541.1071428571429,160 541.1071428571429,152.92893218813452L541.1071428571429,144"
+                      data-edge="true"
+                      data-et="edge"
+                      data-id="L_Web_API_2"
+                      data-look="classic"
+                      data-points="W3sieCI6ODAyLjc1LCJ5IjoyNzZ9LHsieCI6ODAyLjc1LCJ5IjoyNTZ9LHsieCI6OTExLjc1LCJ5IjoyNTZ9LHsieCI6OTExLjc1LCJ5IjoxNjB9LHsieCI6NTQxLjEwNzE0Mjg1NzE0MjksInkiOjE2MH0seyJ4Ijo1NDEuMTA3MTQyODU3MTQyOSwieSI6MTQwfV0="
+                      id="mermaid-ID-L_Web_API_2"
+                      marker-end="url(#mermaid-ID_flowchart-v2-pointEnd)"
+                      style=";"
+                    />
+                    <path
+                      class=" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link"
+                      d="M440.39285714285717,140L440.39285714285717,152.92893218813452Q440.39285714285717,160 433.3217893309917,160L110.07106781186548,160Q103,160 103,167.07106781186548L103,272"
+                      data-edge="true"
+                      data-et="edge"
+                      data-id="L_API_Firestore_0"
+                      data-look="classic"
+                      data-points="W3sieCI6NDQwLjM5Mjg1NzE0Mjg1NzE3LCJ5IjoxNDB9LHsieCI6NDQwLjM5Mjg1NzE0Mjg1NzE3LCJ5IjoxNjB9LHsieCI6MTAzLCJ5IjoxNjB9LHsieCI6MTAzLCJ5IjoyNzZ9XQ=="
+                      id="mermaid-ID-L_API_Firestore_0"
+                      marker-end="url(#mermaid-ID_flowchart-v2-pointEnd)"
+                      style=";"
+                    />
+                    <path
+                      class=" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link"
+                      d="M490.75,28L490.75,120"
+                      data-edge="true"
+                      data-et="edge"
+                      data-id="L_Resume_API_0"
+                      data-look="classic"
+                      data-points="W3sieCI6NDkwLjc1LCJ5IjoyOH0seyJ4Ijo0OTAuNzUsInkiOjEyNH1d"
+                      id="mermaid-ID-L_Resume_API_0"
+                      marker-end="url(#mermaid-ID_flowchart-v2-pointEnd)"
+                      style=";"
+                    />
+                    <path
+                      class=" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link"
+                      d="M460.5357142857143,140L460.5357142857143,172.92893218813452Q460.5357142857143,180 453.4646464738488,180L275.3210678118655,180Q268.25,180 268.25,187.07106781186548L268.25,248.92893218813452Q268.25,256 275.3210678118655,256L317.6789321881345,256Q324.75,256 324.75,263.0710678118655L324.75,272"
+                      data-edge="true"
+                      data-et="edge"
+                      data-id="L_API_Gemini_0"
+                      data-look="classic"
+                      data-points="W3sieCI6NDYwLjUzNTcxNDI4NTcxNDMsInkiOjE0MH0seyJ4Ijo0NjAuNTM1NzE0Mjg1NzE0MywieSI6MTgwfSx7IngiOjI2OC4yNSwieSI6MTgwfSx7IngiOjI2OC4yNSwieSI6MjU2fSx7IngiOjMyNC43NSwieSI6MjU2fSx7IngiOjMyNC43NSwieSI6Mjc2fV0="
+                      id="mermaid-ID-L_API_Gemini_0"
+                      marker-end="url(#mermaid-ID_flowchart-v2-pointEnd)"
+                      style=";"
+                    />
+                    <path
+                      class=" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link"
+                      d="M357.75,276L357.75,263.0710678118655Q357.75,256 364.8210678118655,256L407.1789321881345,256Q414.25,256 414.25,248.92893218813452L414.25,207.07106781186548Q414.25,200 421.3210678118655,200L473.60750361670597,200Q480.67857142857144,200 480.67857142857144,192.92893218813452L480.67857142857144,144"
+                      data-edge="true"
+                      data-et="edge"
+                      data-id="L_Gemini_API_0"
+                      data-look="classic"
+                      data-points="W3sieCI6MzU3Ljc1LCJ5IjoyNzZ9LHsieCI6MzU3Ljc1LCJ5IjoyNTZ9LHsieCI6NDE0LjI1LCJ5IjoyNTZ9LHsieCI6NDE0LjI1LCJ5IjoyMDB9LHsieCI6NDgwLjY3ODU3MTQyODU3MTQ0LCJ5IjoyMDB9LHsieCI6NDgwLjY3ODU3MTQyODU3MTQ0LCJ5IjoxNDB9XQ=="
+                      id="mermaid-ID-L_Gemini_API_0"
+                      marker-end="url(#mermaid-ID_flowchart-v2-pointEnd)"
+                      style=";"
+                    />
+                    <path
+                      class=" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link"
+                      d="M500.82142857142856,140L500.82142857142856,192.92893218813452Q500.82142857142856,200 507.89249638329403,200L560.1789321881345,200Q567.25,200 567.25,207.07106781186548L567.25,248.92893218813452Q567.25,256 574.3210678118655,256L679.6789321881345,256Q686.75,256 686.75,263.0710678118655L686.75,272"
+                      data-edge="true"
+                      data-et="edge"
+                      data-id="L_API_Web_0"
+                      data-look="classic"
+                      data-points="W3sieCI6NTAwLjgyMTQyODU3MTQyODU2LCJ5IjoxNDB9LHsieCI6NTAwLjgyMTQyODU3MTQyODU2LCJ5IjoyMDB9LHsieCI6NTY3LjI1LCJ5IjoyMDB9LHsieCI6NTY3LjI1LCJ5IjoyNTZ9LHsieCI6Njg2Ljc1LCJ5IjoyNTZ9LHsieCI6Njg2Ljc1LCJ5IjoyNzZ9XQ=="
+                      id="mermaid-ID-L_API_Web_0"
+                      marker-end="url(#mermaid-ID_flowchart-v2-pointEnd)"
+                      style=";"
+                    />
+                    <path
+                      class=" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link"
+                      d="M706.0833333333334,292L706.0833333333334,304.9289321881345Q706.0833333333334,312 699.012265521468,312L685.8210678118655,312Q678.75,312 678.75,319.0710678118655L678.75,360.9289321881345Q678.75,368 685.8210678118655,368L724.6789321881345,368Q731.75,368 731.75,375.0710678118655L731.75,384"
+                      data-edge="true"
+                      data-et="edge"
+                      data-id="L_Web_User_0"
+                      data-look="classic"
+                      data-points="W3sieCI6NzA2LjA4MzMzMzMzMzMzMzQsInkiOjI5Mn0seyJ4Ijo3MDYuMDgzMzMzMzMzMzMzNCwieSI6MzEyfSx7IngiOjY3OC43NSwieSI6MzEyfSx7IngiOjY3OC43NSwieSI6MzY4fSx7IngiOjczMS43NSwieSI6MzY4fSx7IngiOjczMS43NSwieSI6Mzg4fV0="
+                      id="mermaid-ID-L_Web_User_0"
+                      marker-end="url(#mermaid-ID_flowchart-v2-pointEnd)"
+                      style=";"
+                    />
+                  </g>
+                  <g
+                    class="edgeLabels"
+                  >
+                    <g
+                      class="edgeLabel"
+                      transform="translate(810.75, 340)"
+                    >
+                      <g
+                        class="label"
+                        data-id="L_User_Web_0"
+                        transform="translate(-52.5, -8)"
+                      >
+                        <g>
+                          <rect
+                            class="background"
+                            height="20"
+                            style=""
+                            width="109"
+                            x="-2"
+                            y="-2"
+                          />
+                          <text
+                            style=""
+                            text-anchor="middle"
+                            y="-10.1"
+                          >
+                            <tspan
+                              class="text-outer-tspan row"
+                              dy="1.1em"
+                              text-anchor="middle"
+                              x="0"
+                              y="-0.1em"
+                            >
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                types
+                              </tspan>
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                 a
+                              </tspan>
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                 message
+                              </tspan>
+                            </tspan>
+                          </text>
+                        </g>
+                      </g>
+                    </g>
+                    <g
+                      class="edgeLabel"
+                      transform="translate(744.75, 228)"
+                    >
+                      <g
+                        class="label"
+                        data-id="L_Web_API_0"
+                        transform="translate(-77, -8)"
+                      >
+                        <g>
+                          <rect
+                            class="background"
+                            height="20"
+                            style=""
+                            width="158"
+                            x="-2"
+                            y="-2"
+                          />
+                          <text
+                            style=""
+                            text-anchor="middle"
+                            y="-10.1"
+                          >
+                            <tspan
+                              class="text-outer-tspan row"
+                              dy="1.1em"
+                              text-anchor="middle"
+                              x="0"
+                              y="-0.1em"
+                            >
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                GET
+                              </tspan>
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                 /session
+                              </tspan>
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                 (on
+                              </tspan>
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                 load)
+                              </tspan>
+                            </tspan>
+                          </text>
+                        </g>
+                      </g>
+                    </g>
+                    <g
+                      class="edgeLabel"
+                      transform="translate(911.75, 228)"
+                    >
+                      <g
+                        class="label"
+                        data-id="L_Web_API_2"
+                        transform="translate(-70, -8)"
+                      >
+                        <g>
+                          <rect
+                            class="background"
+                            height="20"
+                            style=""
+                            width="144"
+                            x="-2"
+                            y="-2"
+                          />
+                          <text
+                            style=""
+                            text-anchor="middle"
+                            y="-10.1"
+                          >
+                            <tspan
+                              class="text-outer-tspan row"
+                              dy="1.1em"
+                              text-anchor="middle"
+                              x="0"
+                              y="-0.1em"
+                            >
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                POST
+                              </tspan>
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                 /chat
+                              </tspan>
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                 (message)
+                              </tspan>
+                            </tspan>
+                          </text>
+                        </g>
+                      </g>
+                    </g>
+                    <g
+                      class="edgeLabel"
+                      transform="translate(103, 228)"
+                    >
+                      <g
+                        class="label"
+                        data-id="L_API_Firestore_0"
+                        transform="translate(-63, -8)"
+                      >
+                        <g>
+                          <rect
+                            class="background"
+                            height="20"
+                            style=""
+                            width="130"
+                            x="-2"
+                            y="-2"
+                          />
+                          <text
+                            style=""
+                            text-anchor="middle"
+                            y="-10.1"
+                          >
+                            <tspan
+                              class="text-outer-tspan row"
+                              dy="1.1em"
+                              text-anchor="middle"
+                              x="0"
+                              y="-0.1em"
+                            >
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                read/write
+                              </tspan>
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                 history
+                              </tspan>
+                            </tspan>
+                          </text>
+                        </g>
+                      </g>
+                    </g>
+                    <g
+                      class="edgeLabel"
+                      transform="translate(490.75, 76)"
+                    >
+                      <g
+                        class="label"
+                        data-id="L_Resume_API_0"
+                        transform="translate(-87.5, -8)"
+                      >
+                        <g>
+                          <rect
+                            class="background"
+                            height="20"
+                            style=""
+                            width="179"
+                            x="-2"
+                            y="-2"
+                          />
+                          <text
+                            style=""
+                            text-anchor="middle"
+                            y="-10.1"
+                          >
+                            <tspan
+                              class="text-outer-tspan row"
+                              dy="1.1em"
+                              text-anchor="middle"
+                              x="0"
+                              y="-0.1em"
+                            >
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                injected
+                              </tspan>
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                 as
+                              </tspan>
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                 system
+                              </tspan>
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                 prompt
+                              </tspan>
+                            </tspan>
+                          </text>
+                        </g>
+                      </g>
+                    </g>
+                    <g
+                      class="edgeLabel"
+                      transform="translate(268.25, 228)"
+                    >
+                      <g
+                        class="label"
+                        data-id="L_API_Gemini_0"
+                        transform="translate(-73.5, -8)"
+                      >
+                        <g>
+                          <rect
+                            class="background"
+                            height="20"
+                            style=""
+                            width="151"
+                            x="-2"
+                            y="-2"
+                          />
+                          <text
+                            style=""
+                            text-anchor="middle"
+                            y="-10.1"
+                          >
+                            <tspan
+                              class="text-outer-tspan row"
+                              dy="1.1em"
+                              text-anchor="middle"
+                              x="0"
+                              y="-0.1em"
+                            >
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                generateContentStream
+                              </tspan>
+                            </tspan>
+                          </text>
+                        </g>
+                      </g>
+                    </g>
+                    <g
+                      class="edgeLabel"
+                      transform="translate(414.25, 228)"
+                    >
+                      <g
+                        class="label"
+                        data-id="L_Gemini_API_0"
+                        transform="translate(-52.5, -8)"
+                      >
+                        <g>
+                          <rect
+                            class="background"
+                            height="20"
+                            style=""
+                            width="109"
+                            x="-2"
+                            y="-2"
+                          />
+                          <text
+                            style=""
+                            text-anchor="middle"
+                            y="-10.1"
+                          >
+                            <tspan
+                              class="text-outer-tspan row"
+                              dy="1.1em"
+                              text-anchor="middle"
+                              x="0"
+                              y="-0.1em"
+                            >
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                streamed
+                              </tspan>
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                 chunks
+                              </tspan>
+                            </tspan>
+                          </text>
+                        </g>
+                      </g>
+                    </g>
+                    <g
+                      class="edgeLabel"
+                      transform="translate(567.25, 228)"
+                    >
+                      <g
+                        class="label"
+                        data-id="L_API_Web_0"
+                        transform="translate(-80.5, -8)"
+                      >
+                        <g>
+                          <rect
+                            class="background"
+                            height="20"
+                            style=""
+                            width="165"
+                            x="-2"
+                            y="-2"
+                          />
+                          <text
+                            style=""
+                            text-anchor="middle"
+                            y="-10.1"
+                          >
+                            <tspan
+                              class="text-outer-tspan row"
+                              dy="1.1em"
+                              text-anchor="middle"
+                              x="0"
+                              y="-0.1em"
+                            >
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                SSE
+                              </tspan>
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                 events
+                              </tspan>
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                 (data:
+                              </tspan>
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                 json)
+                              </tspan>
+                            </tspan>
+                          </text>
+                        </g>
+                      </g>
+                    </g>
+                    <g
+                      class="edgeLabel"
+                      transform="translate(678.75, 340)"
+                    >
+                      <g
+                        class="label"
+                        data-id="L_Web_User_0"
+                        transform="translate(-59.5, -8)"
+                      >
+                        <g>
+                          <rect
+                            class="background"
+                            height="20"
+                            style=""
+                            width="123"
+                            x="-2"
+                            y="-2"
+                          />
+                          <text
+                            style=""
+                            text-anchor="middle"
+                            y="-10.1"
+                          >
+                            <tspan
+                              class="text-outer-tspan row"
+                              dy="1.1em"
+                              text-anchor="middle"
+                              x="0"
+                              y="-0.1em"
+                            >
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                rendered
+                              </tspan>
+                              <tspan
+                                class="text-inner-tspan"
+                                font-style="normal"
+                                font-weight="normal"
+                              >
+                                 markdown
+                              </tspan>
+                            </tspan>
+                          </text>
+                        </g>
+                      </g>
+                    </g>
+                  </g>
+                  <g
+                    class="nodes"
+                  >
+                    <g
+                      class="node default  "
+                      data-look="classic"
+                      id="mermaid-ID"
+                      transform="translate(744.75, 396)"
+                    >
+                      <rect
+                        class="basic label-container"
+                        height="30"
+                        style=""
+                        width="180"
+                        x="-90"
+                        y="-15"
+                      />
+                      <g
+                        class="label"
+                        style=""
+                        transform="translate(-60, 0)"
+                      >
+                        <rect />
+                        <foreignobject
+                          height="0"
+                          width="120"
+                        >
+                          <div
+                            style="display: table; white-space: nowrap; line-height: 1.5; max-width: 120px; text-align: center; width: 120px;"
+                            xmlns="http://www.w3.org/1999/xhtml"
+                          >
+                            <span
+                              class="nodeLabel "
+                            >
+                              <p>
+                                User (Browser)
+                              </p>
+                            </span>
+                          </div>
+                        </foreignobject>
+                      </g>
+                    </g>
+                    <g
+                      class="node default  "
+                      data-look="classic"
+                      id="mermaid-ID"
+                      transform="translate(744.75, 284)"
+                    >
+                      <rect
+                        class="basic label-container"
+                        height="30"
+                        style=""
+                        width="180"
+                        x="-90"
+                        y="-15"
+                      />
+                      <g
+                        class="label"
+                        style=""
+                        transform="translate(-60, 0)"
+                      >
+                        <rect />
+                        <foreignobject
+                          height="0"
+                          width="120"
+                        >
+                          <div
+                            style="display: table; white-space: nowrap; line-height: 1.5; max-width: 120px; text-align: center; width: 120px;"
+                            xmlns="http://www.w3.org/1999/xhtml"
+                          >
+                            <span
+                              class="nodeLabel "
+                            >
+                              <p>
+                                Frontend
+                                <br />
+                                React + Vite
+                                <br />
+                                Firebase Hosting
+                              </p>
+                            </span>
+                          </div>
+                        </foreignobject>
+                      </g>
+                    </g>
+                    <g
+                      class="node default  "
+                      data-look="classic"
+                      id="mermaid-ID"
+                      transform="translate(490.75, 132)"
+                    >
+                      <rect
+                        class="basic label-container"
+                        height="30"
+                        style=""
+                        width="180"
+                        x="-90"
+                        y="-15"
+                      />
+                      <g
+                        class="label"
+                        style=""
+                        transform="translate(-60, 0)"
+                      >
+                        <rect />
+                        <foreignobject
+                          height="0"
+                          width="120"
+                        >
+                          <div
+                            style="display: table; white-space: nowrap; line-height: 1.5; max-width: 120px; text-align: center; width: 120px;"
+                            xmlns="http://www.w3.org/1999/xhtml"
+                          >
+                            <span
+                              class="nodeLabel "
+                            >
+                              <p>
+                                Backend
+                                <br />
+                                Fastify
+                                <br />
+                                Cloud Run
+                              </p>
+                            </span>
+                          </div>
+                        </foreignobject>
+                      </g>
+                    </g>
+                    <g
+                      class="node default  "
+                      data-look="classic"
+                      id="mermaid-ID"
+                      transform="translate(341.25, 284)"
+                    >
+                      <rect
+                        class="basic label-container"
+                        height="30"
+                        style=""
+                        width="180"
+                        x="-90"
+                        y="-15"
+                      />
+                      <g
+                        class="label"
+                        style=""
+                        transform="translate(-60, 0)"
+                      >
+                        <rect />
+                        <foreignobject
+                          height="0"
+                          width="120"
+                        >
+                          <div
+                            style="display: table; white-space: nowrap; line-height: 1.5; max-width: 120px; text-align: center; width: 120px;"
+                            xmlns="http://www.w3.org/1999/xhtml"
+                          >
+                            <span
+                              class="nodeLabel "
+                            >
+                              <p>
+                                Google Gemini API
+                              </p>
+                            </span>
+                          </div>
+                        </foreignobject>
+                      </g>
+                    </g>
+                    <g
+                      class="node default  "
+                      data-look="classic"
+                      id="mermaid-ID"
+                      transform="translate(490.75, 20)"
+                    >
+                      <rect
+                        class="basic label-container"
+                        height="30"
+                        style=""
+                        width="180"
+                        x="-90"
+                        y="-15"
+                      />
+                      <g
+                        class="label"
+                        style=""
+                        transform="translate(-60, 0)"
+                      >
+                        <rect />
+                        <foreignobject
+                          height="0"
+                          width="120"
+                        >
+                          <div
+                            style="display: table; white-space: nowrap; line-height: 1.5; max-width: 120px; text-align: center; width: 120px;"
+                            xmlns="http://www.w3.org/1999/xhtml"
+                          >
+                            <span
+                              class="nodeLabel "
+                            >
+                              <p>
+                                resume.md
+                                <br />
+                                (system prompt)
+                              </p>
+                            </span>
+                          </div>
+                        </foreignobject>
+                      </g>
+                    </g>
+                    <g
+                      class="node default  "
+                      data-look="classic"
+                      id="mermaid-ID"
+                      transform="translate(103, 284)"
+                    >
+                      <rect
+                        class="basic label-container"
+                        height="30"
+                        style=""
+                        width="180"
+                        x="-90"
+                        y="-15"
+                      />
+                      <g
+                        class="label"
+                        style=""
+                        transform="translate(-60, 0)"
+                      >
+                        <rect />
+                        <foreignobject
+                          height="0"
+                          width="120"
+                        >
+                          <div
+                            style="display: table; white-space: nowrap; line-height: 1.5; max-width: 120px; text-align: center; width: 120px;"
+                            xmlns="http://www.w3.org/1999/xhtml"
+                          >
+                            <span
+                              class="nodeLabel "
+                            >
+                              <p>
+                                Firestore
+                                <br />
+                                (session history)
+                              </p>
+                            </span>
+                          </div>
+                        </foreignobject>
+                      </g>
+                    </g>
+                  </g>
+                </g>
+              </g>
+              <defs>
+                <filter
+                  height="130%"
+                  id="mermaid-ID-drop-shadow"
+                  width="130%"
+                >
+                  <fedropshadow
+                    dx="4"
+                    dy="4"
+                    flood-color="#000000"
+                    flood-opacity="0.06"
+                    stdDeviation="0"
+                  />
+                </filter>
+              </defs>
+              <defs>
+                <filter
+                  height="150%"
+                  id="mermaid-ID-drop-shadow-small"
+                  width="150%"
+                >
+                  <fedropshadow
+                    dx="2"
+                    dy="2"
+                    flood-color="#000000"
+                    flood-opacity="0.06"
+                    stdDeviation="0"
+                  />
+                </filter>
+              </defs>
+              <lineargradient
+                gradientUnits="objectBoundingBox"
+                id="mermaid-ID-gradient"
+                x1="0%"
+                x2="100%"
+                y1="0%"
+                y2="0%"
+              >
+                <stop
+                  offset="0%"
+                  stop-color="hsl(0, 0%, 83.3333333333%)"
+                  stop-opacity="1"
+                />
+                <stop
+                  offset="100%"
+                  stop-color="hsl(0, 0%, 88.9215686275%)"
+                  stop-opacity="1"
+                />
+              </lineargradient>
+            </svg>
+          </div>
+          <div
+            aria-hidden="true"
+            class="absolute inset-0 invisible -z-50 w-full h-full pointer-events-none overflow-hidden"
+          />
+        </div>
+      </div>
+    </section>
+    <section
+      class="flex flex-col gap-2"
+    >
+      <h2
+        class="text-base font-semibold"
+      >
+        Under the hood
+      </h2>
+      <div
+        class="text-sm text-muted-foreground flex flex-col gap-2"
+      >
+        <ul
+          class="list-disc list-inside flex flex-col gap-1"
+        >
+          <li>
+            React 19 + Vite, dressed up with Tailwind CSS
+          </li>
+          <li>
+            TanStack Query doing the unglamorous job of caching chat state
+          </li>
+          <li>
+            Fastify v5, streaming answers over Server-Sent Events
+          </li>
+          <li>
+            Google Gemini 2.5 Flash doing the actual thinking
+          </li>
+          <li>
+            Firestore quietly remembering every conversation
+          </li>
+          <li>
+            Turborepo + pnpm workspaces holding the monorepo together
+          </li>
+          <li>
+            Vitest, Testing Library and Biome keeping everyone honest
+          </li>
+          <li>
+            Shipped via Firebase Hosting and GCP Cloud Run
+          </li>
+        </ul>
+      </div>
+    </section>
+    <section
+      class="flex flex-col gap-2"
+    >
+      <h2
+        class="text-base font-semibold"
+      >
+        CI/CD (robots doing Aaron's job)
+      </h2>
+      <div
+        class="text-sm text-muted-foreground flex flex-col gap-2"
+      >
+        <p>
+          Every push to main gets lint, type-check, tests, and a build thrown at it by GitHub Actions. If it survives, a second workflow builds the API into a container, ships it to Cloud Run, then builds and deploys the frontend to Firebase Hosting — no human required, no deploy-day anxiety, no "it works on my machine."
+        </p>
+      </div>
+    </section>
+  </div>
+</div>
+`;

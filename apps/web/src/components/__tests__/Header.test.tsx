@@ -1,16 +1,21 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { Header } from "../Header";
+
+function renderHeader(props: Parameters<typeof Header>[0]) {
+  return render(<Header {...props} />, { wrapper: MemoryRouter });
+}
 
 describe("Header", () => {
   it("renders the title", () => {
-    render(<Header title="Aaron's ResumeBot" onReset={vi.fn()} />);
+    renderHeader({ title: "Aaron's ResumeBot", onReset: vi.fn() });
     expect(screen.getByRole("heading")).toHaveTextContent("Aaron's ResumeBot");
   });
 
   it("calls onReset when reset is confirmed in the dialog", async () => {
     const onReset = vi.fn();
-    render(<Header title="Aaron's ResumeBot" onReset={onReset} />);
+    renderHeader({ title: "Aaron's ResumeBot", onReset });
 
     await userEvent.click(screen.getByRole("button", { name: /reset/i }));
     const dialog = screen.getByRole("alertdialog");
@@ -21,7 +26,7 @@ describe("Header", () => {
 
   it("does not call onReset when cancel is clicked", async () => {
     const onReset = vi.fn();
-    render(<Header title="Aaron's ResumeBot" onReset={onReset} />);
+    renderHeader({ title: "Aaron's ResumeBot", onReset });
 
     await userEvent.click(screen.getByRole("button", { name: /reset/i }));
     await userEvent.click(screen.getByRole("button", { name: /cancel/i }));
@@ -29,8 +34,15 @@ describe("Header", () => {
     expect(onReset).not.toHaveBeenCalled();
   });
 
-  it("renders nav links for CV, LinkedIn and GitHub", () => {
-    render(<Header title="Aaron's ResumeBot" onReset={vi.fn()} />);
+  it("does not render a reset button when onReset is omitted", () => {
+    renderHeader({ title: "About" });
+    expect(screen.queryByRole("button", { name: /reset/i })).not.toBeInTheDocument();
+  });
+
+  it("renders nav links for back-to-chat, about, CV, LinkedIn and GitHub", () => {
+    renderHeader({ title: "Aaron's ResumeBot", onReset: vi.fn() });
+    expect(screen.getByRole("link", { name: /back to chat/i })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: /about/i })).toHaveAttribute("href", "/about");
     expect(screen.getByRole("link", { name: /cv/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /linkedin/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /github/i })).toBeInTheDocument();

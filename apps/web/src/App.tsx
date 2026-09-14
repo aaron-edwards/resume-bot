@@ -1,14 +1,16 @@
+import { Route, Routes } from "react-router-dom";
+import { AboutPage } from "./components/AboutPage";
 import { ChatInput } from "./components/ChatInput";
 import { Header } from "./components/Header";
 import { Spinner } from "./components/Spinner";
 import { Transcript } from "./components/Transcript";
 import { useChat } from "./hooks/useChat";
 
-export default function App() {
+function ChatPage() {
   const { messages, isLoading, isStreaming, error, sendMessage, resetSession } = useChat();
 
   return (
-    <div className="flex flex-col h-dvh">
+    <>
       <Header title="Aaron's ResumeBot" onReset={resetSession} />
       <div className="flex flex-col flex-1 overflow-hidden max-w-2xl w-full mx-auto p-4 gap-4">
         {isLoading ? (
@@ -21,6 +23,25 @@ export default function App() {
         {error && <p className="text-sm text-destructive text-center">{error}</p>}
         <ChatInput onSend={sendMessage} isStreaming={isStreaming || isLoading} />
       </div>
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <div className="flex flex-col h-dvh">
+      <Routes>
+        <Route path="/" element={<ChatPage />} />
+        <Route
+          path="/about"
+          element={
+            <>
+              <Header title="About" />
+              <AboutPage />
+            </>
+          }
+        />
+      </Routes>
     </div>
   );
 }
