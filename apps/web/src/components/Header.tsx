@@ -1,4 +1,4 @@
-import { FileDown, Info } from "lucide-react";
+import { FileDown, Info, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ResetDialog } from "./ResetDialog";
 import { GitHubIcon, LinkedInIcon } from "./icons/BrandIcons";
@@ -7,6 +7,8 @@ import { RobotIcon } from "./icons/RobotIcon";
 type HeaderProps = {
   title: string;
   onReset?: () => void;
+  showAbout?: boolean;
+  showHome?: boolean;
 };
 
 function NavItemContent({ label, children }: { label: string; children: React.ReactNode }) {
@@ -41,7 +43,7 @@ function NavLink({ href, label, download, className, children }: NavLinkProps) {
   );
 }
 
-export function Header({ title, onReset }: HeaderProps) {
+export function Header({ title, onReset, showAbout, showHome }: HeaderProps) {
   return (
     <header className="border-b px-4 py-3 flex items-center gap-3">
       <Link
@@ -53,15 +55,29 @@ export function Header({ title, onReset }: HeaderProps) {
       </Link>
       <h1 className="text-lg font-semibold flex-1">{title}</h1>
       <nav aria-label="Actions" className="flex items-center gap-4">
-        <Link
-          to="/about"
-          aria-label="About"
-          className="text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <NavItemContent label="About">
-            <Info className="h-5 w-5" />
-          </NavItemContent>
-        </Link>
+        {onReset && <ResetDialog onReset={onReset} />}
+        {showAbout && (
+          <Link
+            to="/about"
+            aria-label="About"
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <NavItemContent label="About">
+              <Info className="h-5 w-5" />
+            </NavItemContent>
+          </Link>
+        )}
+        {showHome && (
+          <Link
+            to="/"
+            aria-label="Back to Chat"
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <NavItemContent label="Chat">
+              <MessageCircle className="h-5 w-5" />
+            </NavItemContent>
+          </Link>
+        )}
         <NavLink href="/Aaron Edwards - CV.pdf" label="CV" download className="hover:text-red-500">
           <FileDown className="h-5 w-5" />
         </NavLink>
@@ -79,7 +95,6 @@ export function Header({ title, onReset }: HeaderProps) {
         >
           <GitHubIcon className="h-5 w-5" />
         </NavLink>
-        {onReset && <ResetDialog onReset={onReset} />}
       </nav>
     </header>
   );
