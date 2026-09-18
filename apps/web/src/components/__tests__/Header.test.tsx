@@ -39,12 +39,29 @@ describe("Header", () => {
     expect(screen.queryByRole("button", { name: /reset/i })).not.toBeInTheDocument();
   });
 
-  it("renders nav links for back-to-chat, about, CV, LinkedIn and GitHub", () => {
+  it("renders nav links for back-to-chat, CV, LinkedIn and GitHub", () => {
     renderHeader({ title: "Aaron's ResumeBot", onReset: vi.fn() });
     expect(screen.getByRole("link", { name: /back to chat/i })).toHaveAttribute("href", "/");
-    expect(screen.getByRole("link", { name: /about/i })).toHaveAttribute("href", "/about");
     expect(screen.getByRole("link", { name: /cv/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /linkedin/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /github/i })).toBeInTheDocument();
+  });
+
+  it("renders the about link only when showAbout is set", () => {
+    const { rerender } = renderHeader({ title: "Aaron's ResumeBot" });
+    expect(screen.queryByRole("link", { name: /about/i })).not.toBeInTheDocument();
+
+    rerender(<Header title="Aaron's ResumeBot" showAbout />);
+    expect(screen.getByRole("link", { name: /about/i })).toHaveAttribute("href", "/about");
+  });
+
+  it("renders the chat nav link only when showHome is set", () => {
+    const { rerender } = renderHeader({ title: "About" });
+    expect(screen.getAllByRole("link", { name: /back to chat/i })).toHaveLength(1);
+
+    rerender(<Header title="About" showHome />);
+    const backLinks = screen.getAllByRole("link", { name: /back to chat/i });
+    expect(backLinks).toHaveLength(2);
+    for (const link of backLinks) expect(link).toHaveAttribute("href", "/");
   });
 });

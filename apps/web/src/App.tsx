@@ -11,7 +11,7 @@ function ChatPage() {
 
   return (
     <>
-      <Header title="Aaron's ResumeBot" onReset={resetSession} />
+      <Header title="Aaron's ResumeBot" onReset={resetSession} showAbout />
       <div className="flex flex-col flex-1 overflow-hidden max-w-2xl w-full mx-auto p-4 gap-4">
         {isLoading ? (
           <div className="flex flex-1 items-center justify-center">
@@ -36,7 +36,7 @@ export default function App() {
           path="/about"
           element={
             <>
-              <Header title="About" />
+              <Header title="About" showHome />
               <AboutPage />
             </>
           }
